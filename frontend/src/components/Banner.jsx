@@ -10,7 +10,7 @@ const Banner = () => {
       <div className="flex-1 py-8 sm:py-10 lg:py-24 lg:pl-5">
         <div className="text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold text-white">
           <p>Book Appointment</p>
-          <p mt-4>with 100+ Trusted Doctors</p>
+          <p className="mt-4">with 100+ Trusted Doctors</p>
         </div>
         <button
           onClick={() => navigate("./login")}
