@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { assets } from "../assets/assets";
+import RelatedDoctors from "../components/RelatedDoctors";
 
 const Appointment = () => {
   const { docId } = useParams();
@@ -10,11 +11,15 @@ const Appointment = () => {
   const [docSlots, setDocSlots] = useState([]);
   const [slotIndex, setSlotIndex] = useState(0);
   const [slotTime, setSlotTime] = useState("");
+  const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-  const getAvailableTime = async () => {
+  const getAvailableSlots = async () => {
+    setDocSlots([]);
+    //Getting Current Date
     let today = new Date();
 
     for (let i = 0; i < 7; i++) {
+      //Getting Date with Index
       let currentDate = new Date(today);
       currentDate.setDate(today.getDate() + i);
       // Setting End Time of the day with index
@@ -34,8 +39,8 @@ const Appointment = () => {
       }
 
       let timeSlots = [];
-      while (currentDate <= endTime) {
-        let formattedTime = currentDate.toLocaleString("en-US", {
+      while (currentDate < endTime) {
+        let formattedTime = currentDate.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         });
@@ -63,7 +68,7 @@ const Appointment = () => {
   }, [doctors, docId]);
 
   useEffect(() => {
-    getAvailableTime();
+    getAvailableSlots();
   }, [docInfo]);
   useEffect(() => {
     console.log(docSlots);
@@ -120,6 +125,41 @@ const Appointment = () => {
             </div>
           </div>
         </div>
+
+        {/* --------------------Booking Slots --------------*/}
+        <div className="sm:ml-72 sm:pl-4 mt-4 font-medium text-gray-700">
+          <p>Booking Slots</p>
+          <div className="flex gap-3 items-center w-full overflow-x-scroll mt-4">
+            {docSlots.length &&
+              docSlots.map((slot, index) => (
+                <div
+                  onClick={() => setSlotIndex(index)}
+                  className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${
+                    slotIndex === index
+                      ? "bg-primary text-white"
+                      : "border border-gray-200"
+                  }`}
+                  key={index}
+                >
+                  <p>{slot[0] && daysOfWeek[slot[0].dateTime.getDay()]}</p>
+                  <p>{slot[0] && slot[0].dateTime.getDate()}</p>
+                </div>
+              ))}
+          </div>
+          <div className="flex items-center gap-3 w-full overflow-x-scroll mt-4">
+            {docSlots.length && docSlots[slotIndex].map((slot, index) => (
+                <p onClick={()=>setSlotTime(slot.time)} className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${slot.time === slotTime ? "bg-primary text-white" : "text-gray-400 border border-gray-300"}`} key={index}>
+                {slot.time.toLowerCase()}
+              </p>
+            ))
+
+                }
+          </div>
+          <button className="bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6">Book an Appointment</button>
+        </div>
+
+        {/* /* --------------Listing Related Doctors *--------------- */}
+         <RelatedDoctors docId={docId} speciality={docInfo.speciality}/>
       </div>
     )
   );
