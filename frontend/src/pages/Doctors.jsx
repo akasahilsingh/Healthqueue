@@ -26,7 +26,7 @@ const Doctors = () => {
   return (
     <div>
       <p className="text-gray-600">Browse through the doctors specialist.</p>
-      <div className="flex itmems-end gap-x-5 mt-5">
+      <div className="flex flex-col sm:flex-row gap-x-5 mt-5">
         <div className="flex flex-col sm:flex-row items-start gap-5">
           <button
             className={`py-1 px-3 border rounded text-sm transition-all sm:hidden ${
@@ -124,7 +124,7 @@ const Doctors = () => {
             filterDoc.map((doctor, index) => (
               <div
                 onClick={() => navigate(`/appointment/${doctor._id}`)}
-                className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500"
+                className="border mt-5 sm:mt-0 border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500"
                 key={index}
               >
                 <img
