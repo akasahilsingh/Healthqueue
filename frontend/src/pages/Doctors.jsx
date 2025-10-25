@@ -106,7 +106,7 @@ const Doctors = () => {
             </p>
           </div>
         </div>
-        <div className="w-full grid md:grid-cols-5 grid-cols-2 gap-4 gap-y-6">
+        <div className="w-full grid md:grid-cols-4 gap-4 gap-y-6">
           {filterDoc && filterDoc.length ? (
             filterDoc.map((doctor, index) => (
               <div
