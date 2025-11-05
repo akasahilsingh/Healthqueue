@@ -2,27 +2,28 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "../models/doctorModel.js";
+import jwt from "jsonwebtoken";
 
 // API For adding doctor
 
 const addDoctor = async (req, res) => {
   try {
-    console.log('Headers:', req.headers['content-type']);
-    console.log('Full Request Body:', req.body);
-    console.log('File:', req.file);
-    
+    console.log("Headers:", req.headers["content-type"]);
+    console.log("Full Request Body:", req.body);
+    console.log("File:", req.file);
+
     // Log each field individually
-    console.log('Individual fields:');
-    console.log('name:', req.body.name);
-    console.log('email:', req.body.email);
-    console.log('password:', req.body.password);
-    console.log('speciality:', req.body.speciality);
-    console.log('degree:', req.body.degree);
-    console.log('experience:', req.body.experience);
-    console.log('about:', req.body.about);
-    console.log('fees:', req.body.fees);
-    console.log('address:', req.body.address);
-    
+    console.log("Individual fields:");
+    console.log("name:", req.body.name);
+    console.log("email:", req.body.email);
+    console.log("password:", req.body.password);
+    console.log("speciality:", req.body.speciality);
+    console.log("degree:", req.body.degree);
+    console.log("experience:", req.body.experience);
+    console.log("about:", req.body.about);
+    console.log("fees:", req.body.fees);
+    console.log("address:", req.body.address);
+
     const {
       name,
       email,
@@ -50,7 +51,18 @@ const addDoctor = async (req, res) => {
       !address ||
       !imageFile
     ) {
-      console.log('Missing fields:', { name, email, password, speciality, degree, experience, about, fees, address, imageFile: !!imageFile });
+      console.log("Missing fields:", {
+        name,
+        email,
+        password,
+        speciality,
+        degree,
+        experience,
+        about,
+        fees,
+        address,
+        imageFile: !!imageFile,
+      });
       return res.json({ success: false, message: "All fields are required" });
     }
 
@@ -100,4 +112,24 @@ const addDoctor = async (req, res) => {
   }
 };
 
-export { addDoctor };
+// API for the admin login
+const loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      const token = jwt.sign(email+password, process.env.JWT_SECRET)
+      res.json({sucess: true, message: "Login successful", token})
+
+    } else {
+      res.json({ success: false, message: "Invalid credentials" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.json({ success: false, message: "Something went wrong" });
+  }
+};
+
+export { addDoctor, loginAdmin };
