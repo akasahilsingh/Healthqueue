@@ -9,7 +9,7 @@ const Login = () => {
   const [state, setState] = useState("Admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setAToken, backendUrl } = useContext(AdminContext);
+  const { setAtoken, backendUrl } = useContext(AdminContext);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -23,7 +23,7 @@ const Login = () => {
         if (data.success) {
           console.log(data.token);
           localStorage.setItem("atoken", data.token);
-          setAToken(data.token);
+          setAtoken(data.token);
         } else {
           toast.error(data.message);
         }
