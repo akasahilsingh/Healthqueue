@@ -22,11 +22,10 @@ const Login = () => {
         });
         if (data.success) {
           console.log(data.token);
-          localStorage.setItem("aToken", data.token);
+          localStorage.setItem("atoken", data.token);
           setAToken(data.token);
         } else {
-            toast.error(data.message);
-
+          toast.error(data.message);
         }
       }
     } catch (error) {
