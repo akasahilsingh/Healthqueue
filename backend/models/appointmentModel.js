@@ -18,11 +18,11 @@ const appointmentSchema = new Schema({
     required: true,
   },
   userData: {
-    type: String,
+    type: Object,
     required: true,
   },
   docData: {
-    type: String,
+    type: Object,
     required: true,
   },
   amount: {

@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import { v2 as cloudinary } from "cloudinary";
+import doctorModel from "../models/doctorModel.js";
+import appointmentModel from "../models/appointmentModel.js";
 
 const registerUser = async (req, res) => {
   try {
@@ -170,5 +172,90 @@ const updateProfile = async (req, res) => {
     });
   }
 };
+const bookAppointment = async (req, res) => {
+  try {
+    const { docId, slotDate, slotTime } = req.body;
+    const userId = req.user?.id;
 
-export { registerUser, loginUser, getProfile, updateProfile };
+    if (!docId || !slotDate || !slotTime || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing booking details",
+      });
+    }
+
+    const docData = await doctorModel.findById(docId).select("-password");
+    if (!docData) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+
+    if (docData.availability) {
+      return res.status(400).json({
+        success: false,
+        message: "Doctor is not available for appointment",
+      });
+    }
+
+    const slotsBooked = docData.slots_booked || {};
+    const bookedSlotsForDate = slotsBooked[slotDate] || [];
+
+    if (bookedSlotsForDate.includes(slotTime)) {
+      return res.status(400).json({
+        success: false,
+        message: "This slot is already booked",
+      });
+    }
+
+    const user = await userModel.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const { slots_booked: _, ...docDataWithoutSlots } = docData.toObject();
+
+    const appointment = {
+      userId,
+      docId,
+      slotDate,
+      slotTime,
+      userData: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        image: user.image,
+      },
+      docData: docDataWithoutSlots,
+      amount: docData.fees,
+      date: Date.now(),
+    };
+
+    const newAppointment = new appointmentModel(appointment);
+    await newAppointment.save();
+
+    const updatedSlotsBooked = {
+      ...slotsBooked,
+      [slotDate]: [...bookedSlotsForDate, slotTime],
+    };
+
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked: updatedSlotsBooked });
+
+    return res.status(201).json({
+      success: true,
+      newAppointment,
+      message: "Successfully booked Appointment",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment };
