@@ -9,10 +9,15 @@ const AppContextProvider = (prop) => {
   const currencySymbol = "₹";
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [doctors, setDoctors] = useState([]);
+  const [token, setToken] = useState(() => localStorage.getItem("token") || "");
 
-  const value = {
-    doctors,
-    currencySymbol,
+  const updateToken = (newToken) => {
+    setToken(newToken || "");
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+    } else {
+      localStorage.removeItem("token");
+    }
   };
 
   const getDoctorsData = async () => {
@@ -27,6 +32,14 @@ const AppContextProvider = (prop) => {
       console.log(error.message);
       toast.error(error.message);
     }
+  };
+
+  const value = {
+    doctors,
+    currencySymbol,
+    token,
+    setToken: updateToken,
+    backendUrl,
   };
 
   useEffect(() => {
