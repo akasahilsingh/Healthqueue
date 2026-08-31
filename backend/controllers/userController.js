@@ -53,4 +53,50 @@ const registerUser = async (req, res) => {
   }
 };
 
-export { registerUser };
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password is required",
+      });
+    }
+
+    const userExists = await userModel.findOne({ email });
+    if (!userExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Email id is not registered",
+      });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      userExists.password,
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(400).json({
+        success: false,
+        message: "Wrong credentials",
+      });
+    }
+
+    const token = jwt.sign({ id: userExists._id }, process.env.JWT_SECRET);
+
+    return res.status(200).json({
+      success: true,
+      token,
+      message: "Logged In successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export { registerUser, loginUser };
