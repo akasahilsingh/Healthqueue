@@ -120,9 +120,8 @@ const loginAdmin = async (req, res) => {
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
     ) {
-      const token = jwt.sign(email+password, process.env.JWT_SECRET)
-      res.json({success: true, message: "Login successful", token})
-
+      const token = jwt.sign(email + password, process.env.JWT_SECRET);
+      res.json({ success: true, message: "Login successful", token });
     } else {
       res.json({ success: false, message: "Invalid credentials" });
     }
@@ -132,4 +131,17 @@ const loginAdmin = async (req, res) => {
   }
 };
 
-export { addDoctor, loginAdmin };
+const getAllDoctor = async (req, res) => {
+  try {
+    const allDoctors = await doctorModel.find({}).select("-password");
+    res.status(200).json({
+      success: true,
+      doctors: allDoctors,
+      message: "All doctors fetched successfully",
+    });
+  } catch (error) {
+    console.log("Error while getting all doctors", error.message);
+  }
+};
+
+export { addDoctor, loginAdmin, getAllDoctor };
