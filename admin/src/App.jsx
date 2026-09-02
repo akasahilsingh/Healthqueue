@@ -40,7 +40,9 @@ import DoctorsList from "./Pages/Admin/DoctorsList.jsx";
 //temp
 
 const App = () => {
-  return (
+  const { atoken } = useContext(AdminContext);
+
+  return atoken ? (
     <div className="bg-[#f8f9fd]">
       <ToastContainer />
       <Navbar />
@@ -55,6 +57,11 @@ const App = () => {
         </Routes>
       </div>
     </div>
+  ) : (
+    <>
+      <Login />
+      <ToastContainer />
+    </>
   );
 };
 
