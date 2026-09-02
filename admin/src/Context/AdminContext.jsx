@@ -58,8 +58,30 @@ const AdminContextProvider = (props) => {
 
       if (data.success) {
         setAppointments(data.appointments);
-        console.log(data.appointments)
+        console.log(data.appointments);
         // toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const cancelAppointment = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/admin/cancel-appointment",
+        { appointmentId },
+        {
+          headers: { atoken },
+        },
+      );
+
+      if (data.success) {
+        getAllAppointments();
+
+        toast.success(data.message);
       } else {
         toast.error(data.message);
       }
@@ -78,6 +100,7 @@ const AdminContextProvider = (props) => {
     appointments,
     setAppointments,
     getAllAppointments,
+    cancelAppointment
   };
 
   return (

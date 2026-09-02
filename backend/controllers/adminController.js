@@ -165,4 +165,64 @@ const appointmentAdmin = async (req, res) => {
   }
 };
 
-export { addDoctor, loginAdmin, getAllDoctor, appointmentAdmin };
+const appointmentCancel = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    if (!appointmentId) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment ID is required",
+      });
+    }
+
+    const appointment = await appointmentModel.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
+    appointment.cancelled = true;
+    await appointment.save();
+
+    const { docId, slotTime, slotDate } = appointment;
+    const doctorData = await doctorModel.findById(docId);
+    if (!doctorData) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+    let slots_booked = doctorData.slots_booked;
+
+    if (slots_booked?.[slotDate]) {
+      slots_booked[slotDate] = slots_booked[slotDate].filter(
+        (e) => e !== slotTime,
+      );
+    }
+
+    await doctorModel.findByIdAndUpdate(docId, {
+      slots_booked,
+    });
+
+    return res.status(200).json({
+      success: true,
+      cancelledAppointment: appointment,
+      message: "Appointment cancelled successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to cancel the appointment",
+    });
+  }
+};
+
+export {
+  addDoctor,
+  loginAdmin,
+  getAllDoctor,
+  appointmentAdmin,
+  appointmentCancel,
+};
