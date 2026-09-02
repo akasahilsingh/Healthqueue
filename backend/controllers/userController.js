@@ -318,12 +318,9 @@ const cancelAppointment = async (req, res) => {
       (e) => e !== slotTime,
     );
 
-    await doctorModel.findByIdAndUpdate(
-      docId ,
-      {
-        slots_booked,
-      },
-    );
+    await doctorModel.findByIdAndUpdate(docId, {
+      slots_booked,
+    });
 
     return res.status(200).json({
       success: true,
@@ -338,6 +335,21 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
+const paymentRazorPay = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    res.status(201).json({
+      success: true,
+      message: "Successfull razor pay ment",
+    });
+  } catch {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export {
   registerUser,
   loginUser,
@@ -346,4 +358,5 @@ export {
   bookAppointment,
   listAppointment,
   cancelAppointment,
+  paymentRazorPay,
 };

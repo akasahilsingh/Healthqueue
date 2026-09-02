@@ -9,6 +9,7 @@ const AdminContextProvider = (props) => {
     localStorage.getItem("atoken") ? localStorage.getItem("atoken") : "",
   );
   const [doctors, setDoctors] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const getAllDoctors = async () => {
@@ -31,19 +32,40 @@ const AdminContextProvider = (props) => {
     }
   };
 
-  const changeAvailability = async(docId) => {
+  const changeAvailability = async (docId) => {
     try {
-      const { data } = await axios.post(backendUrl + '/api/admin/change-availibility', { docId }, { headers: { atoken } })
-      if(data.success) {
-        toast.success(data.message)
-        getAllDoctors()
+      const { data } = await axios.post(
+        backendUrl + "/api/admin/change-availibility",
+        { docId },
+        { headers: { atoken } },
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getAllDoctors();
       } else {
-        toast.error(data.error)
+        toast.error(data.error);
       }
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.message);
     }
-  }
+  };
+
+  const getAllAppointments = async () => {
+    try {
+      const { data } = await axios.get(backendUrl + "/api/admin/appointments", {
+        headers: { atoken },
+      });
+
+      if (data.success) {
+        setAppointments(data.appointments);
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
   const value = {
     atoken,
     setAtoken,
@@ -51,11 +73,16 @@ const AdminContextProvider = (props) => {
     doctors,
     setDoctors,
     getAllDoctors,
-    changeAvailability
+    changeAvailability,
+    appointments,
+    setAppointments,
+    getAllAppointments,
   };
 
   return (
-    <AdminContext.Provider value={value}>{props.children}</AdminContext.Provider>
+    <AdminContext.Provider value={value}>
+      {props.children}
+    </AdminContext.Provider>
   );
 };
 

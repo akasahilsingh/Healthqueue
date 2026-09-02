@@ -25,5 +25,6 @@ userRouter.post(
 userRouter.post("/book-appointment", authUser, bookAppointment)
 userRouter.get("/appointments", authUser, listAppointment)
 userRouter.post("/cancel-appointment", authUser, cancelAppointment)
+userRouter.post("payment-razorpay", authUser, )
 
 export default userRouter;
