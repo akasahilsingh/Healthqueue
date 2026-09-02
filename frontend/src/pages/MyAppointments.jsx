@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import axios from "axios";
 
 const MyAppointments = () => {
-  const { backendUrl, token, getDoctorData } = useContext(AppContext);
+  const { backendUrl, token, getDoctorsData } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
   const months = [
     "Jan",
@@ -64,7 +64,7 @@ const MyAppointments = () => {
       if (data.success) {
         toast.success(data.message);
         getUserAppointment();
-        getDoctorData();
+        getDoctorsData();
       } else {
         toast.error(DataTransferItem.message);
       }

@@ -229,6 +229,7 @@ const bookAppointment = async (req, res) => {
         email: user.email,
         phone: user.phone,
         image: user.image,
+        dob: user.dob,
       },
       docData: docDataWithoutSlots,
       amount: docData.fees,

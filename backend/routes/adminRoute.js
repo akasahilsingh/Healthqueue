@@ -10,6 +10,6 @@ adminRouter.post('/add-doctor',authAdmin, upload.single('image'), addDoctor)
 adminRouter.post('/login', loginAdmin)
 adminRouter.post('/all-doctor', authAdmin, getAllDoctor)
 adminRouter.post('/change-availibility', authAdmin, changeAvailability)
-adminRouter.get("/apointments", authAdmin, appointmentAdmin)
+adminRouter.get("/appointments", authAdmin, appointmentAdmin)
 
 export default adminRouter;
