@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useCallback, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -36,7 +36,7 @@ const MyAppointments = () => {
     return `${day} ${months[month - 1] || ""} ${year}`;
   };
 
-  const getUserAppointment = async () => {
+  const getUserAppointment = useCallback(async () => {
     try {
       const { data } = await axios.get(backendUrl + "/api/user/appointments", {
         headers: { token },
@@ -52,7 +52,7 @@ const MyAppointments = () => {
     } catch (error) {
       toast.error(error.message);
     }
-  };
+  }, [backendUrl, token]);
 
   const cancelAppointment = async (appointmentId) => {
     try {
@@ -66,7 +66,7 @@ const MyAppointments = () => {
         getUserAppointment();
         getDoctorsData();
       } else {
-        toast.error(DataTransferItem.message);
+        toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
@@ -94,7 +94,7 @@ const MyAppointments = () => {
     if (token) {
       getUserAppointment();
     }
-  }, [token]);
+  }, [token, getUserAppointment]);
 
   return (
     <div>
@@ -133,26 +133,31 @@ const MyAppointments = () => {
 
               <div></div>
               <div className="flex flex-col gap-2 justify-end">
-                {!appointment.cancelled && (
-                  <button
-                    onClick={() => appointmentRazorPay(appointment._id)}
-                    className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:text-white hover:bg-primary transition-all duration-300"
-                  >
-                    Pay Online
-                  </button>
-                )}
-                {!appointment.cancelled && (
-                  <button
-                    onClick={() => cancelAppointment(appointment._id)}
-                    className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:text-white hover:bg-red-600 transition-all duration-300"
-                  >
-                    Cancel Appointment
-                  </button>
-                )}
-                {appointment.cancelled && (
-                  <button className="sm:min-48 py-2 border border-red-500 rounded text-red-500">
+                {appointment.cancelled ? (
+                  <button className="sm:min-w-48 py-2 border border-red-500 rounded text-red-500">
                     Appointment Cancelled
                   </button>
+                ) : appointment.isCompleted ? (
+                  <button className="sm:min-w-48 py-2 border border-green-500 rounded text-green-500">
+                    Completed
+                  </button>
+                ) : (
+                  <>
+                    {!appointment.payment && (
+                      <button
+                        onClick={() => appointmentRazorPay(appointment._id)}
+                        className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:text-white hover:bg-primary transition-all duration-300"
+                      >
+                        Pay Online
+                      </button>
+                    )}
+                    <button
+                      onClick={() => cancelAppointment(appointment._id)}
+                      className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:text-white hover:bg-red-600 transition-all duration-300"
+                    >
+                      Cancel Appointment
+                    </button>
+                  </>
                 )}
               </div>
             </div>
