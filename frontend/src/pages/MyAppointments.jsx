@@ -2,6 +2,7 @@ import React, { useCallback, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/errorMessage";
 import { useEffect } from "react";
 import axios from "axios";
 
@@ -50,7 +51,7 @@ const MyAppointments = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   }, [backendUrl, token]);
 
@@ -69,7 +70,7 @@ const MyAppointments = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -86,7 +87,7 @@ const MyAppointments = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 

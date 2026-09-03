@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createContext, useCallback, useState } from "react";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/errorMessage";
 
 export const DoctorContext = createContext();
 
@@ -22,7 +23,7 @@ const DoctorContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -40,7 +41,7 @@ const DoctorContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -58,7 +59,7 @@ const DoctorContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -72,7 +73,7 @@ const DoctorContextProvider = (props) => {
         console.log(data.dashData);
       } else [toast.error(data.message)];
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -86,7 +87,7 @@ const DoctorContextProvider = (props) => {
         console.log(data.profileData)
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   }, [backendUrl, dtoken]);
   const value = {

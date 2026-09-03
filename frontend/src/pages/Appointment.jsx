@@ -5,6 +5,7 @@ import { AppContext } from "../context/AppContext";
 import { assets } from "../assets/assets";
 import RelatedDoctors from "../components/RelatedDoctors";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/errorMessage";
 
 const Appointment = () => {
   const { docId } = useParams();
@@ -124,7 +125,7 @@ const Appointment = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 

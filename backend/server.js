@@ -18,6 +18,7 @@ connectCloudinary();
 app.use(express.json());
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  "https://healthqueue-olive.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
 ].filter(Boolean);

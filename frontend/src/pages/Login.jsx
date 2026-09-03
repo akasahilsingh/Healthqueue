@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getErrorMessage } from "../utils/errorMessage";
 const Login = () => {
   const { backendUrl, token, setToken } = useContext(AppContext);
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const Login = () => {
         }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 

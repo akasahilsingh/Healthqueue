@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createContext, useState } from "react";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/errorMessage";
 
 export const AdminContext = createContext();
 
@@ -29,7 +30,7 @@ const AdminContextProvider = (props) => {
       }
     } catch (error) {
       console.log(error.message);
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -47,7 +48,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.error);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -65,7 +66,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -87,7 +88,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -104,7 +105,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
   const value = {

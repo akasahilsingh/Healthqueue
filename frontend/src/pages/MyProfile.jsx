@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { assets } from "../assets/assets.js";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/errorMessage";
 import axios from "axios";
 
 const MyProfile = () => {
@@ -44,7 +45,7 @@ const MyProfile = () => {
         toast.error(data?.message || "Profile update failed");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 

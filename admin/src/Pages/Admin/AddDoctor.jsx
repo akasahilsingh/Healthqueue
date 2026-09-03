@@ -3,6 +3,7 @@ import { assets } from "../../assets/assets";
 import { AdminContext } from "../../Context/AdminContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { getErrorMessage } from "../../utils/errorMessage";
 
 const AddDoctor = () => {
   const [docImg, setDocImg] = useState(null);
@@ -77,7 +78,7 @@ const AddDoctor = () => {
       }
     } catch (error) {
       console.log(error.response?.data || error.message);
-      toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 

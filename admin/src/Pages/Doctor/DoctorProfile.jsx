@@ -3,6 +3,7 @@ import { DoctorContext } from "../../Context/Doctorcontext";
 import { AppContext } from "../../Context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../../utils/errorMessage";
 
 const DoctorProfile = () => {
   const { dtoken, backendUrl, profileData, setProfileData, getProfileData } =
@@ -31,7 +32,7 @@ const DoctorProfile = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 

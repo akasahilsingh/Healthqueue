@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";
 // import { doctors } from "../assets/assets";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../utils/errorMessage";
 
 export const AppContext = createContext();
 
@@ -30,7 +31,7 @@ const AppContextProvider = (prop) => {
       }
     } catch (error) {
       console.log(error.message);
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
@@ -46,7 +47,7 @@ const AppContextProvider = (prop) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(getErrorMessage(error, backendUrl));
     }
   };
 
