@@ -208,6 +208,64 @@ const doctordashboard = async (req, res) => {
     });
   }
 };
+
+//  API to get doctor profile for Doctor panel
+const doctorProfile = async (req, res) => {
+  try {
+    const docId = req.user;
+
+    const profileData = await doctorModel.findById(docId).select("-password");
+
+    if (!profileData) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      profileData,
+      message: "Successfully fetched doctor profile data",
+    });
+  } catch (error) {
+    console.log(
+      "Error while fetching doctor profile for doctor dashboard: ",
+      error.message,
+    );
+    return res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Unable to fetch doctor profile data for doctor dashboard",
+    });
+  }
+};
+
+// API to update doctor profile data from doctor panel
+
+const updateDoctorProfile = async (req, res) => {
+  try {
+    const { fees, address, availability } = req.body;
+    const docId = req.user;
+
+    await doctorModel.findByIdAndUpdate(docId, {
+      fees,
+      address,
+      availability,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Doctor profile updated successfully",
+    });
+  } catch (error) {
+    console.log("Error while updating doctor profile: ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable update doctor profile",
+    });
+  }
+};
 export {
   changeAvailability,
   doctorList,
@@ -215,5 +273,7 @@ export {
   appointmentsDoctor,
   appointmentComplete,
   appointmentCancel,
-  doctordashboard
+  doctordashboard,
+  doctorProfile,
+  updateDoctorProfile,
 };

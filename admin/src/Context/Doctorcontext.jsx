@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import { toast } from "react-toastify";
 
 export const DoctorContext = createContext();
@@ -9,6 +9,7 @@ const DoctorContextProvider = (props) => {
   const [dtoken, setdToken] = useState(localStorage.getItem("dtoken") || "");
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
+  const [profileData, setProfileData] = useState(false);
 
   const getAppointments = async () => {
     try {
@@ -68,12 +69,26 @@ const DoctorContextProvider = (props) => {
       });
       if (data.success) {
         setDashData(data.dashData);
-        console.log(data.dashData)
+        console.log(data.dashData);
       } else [toast.error(data.message)];
     } catch (error) {
       toast.error(error.message);
     }
   };
+
+  const getProfileData = useCallback(async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/doctor/profile`, {
+        headers: { dtoken },
+      });
+      if (data.success) {
+        setProfileData(data.profileData);
+        console.log(data.profileData)
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }, [backendUrl, dtoken]);
   const value = {
     dtoken,
     setdToken,
@@ -86,6 +101,9 @@ const DoctorContextProvider = (props) => {
     dashData,
     setDashData,
     getDashData,
+    profileData,
+    setProfileData,
+    getProfileData,
   };
 
   return (
