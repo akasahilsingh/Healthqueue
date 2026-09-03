@@ -1,17 +1,17 @@
-export const getErrorMessage = (error, backendUrl) => {
+export const getErrorMessage = (error) => {
   const serverMessage = error.response?.data?.message || error.response?.data?.error;
 
-  if (serverMessage) {
+  if (serverMessage && error.response.status < 500) {
     return serverMessage;
   }
 
   if (error.response) {
-    return `Request failed (${error.response.status} ${error.response.statusText || "Unknown error"})`;
+    return "The server could not complete your request. Please try again later.";
   }
 
   if (error.request) {
-    return `Network error: could not reach ${backendUrl}. Check that the backend is running and that the URL is correct.`;
+    return "Unable to connect to the server. Please check your connection and try again.";
   }
 
-  return error.message || "Something went wrong";
+  return "Something went wrong. Please try again.";
 };

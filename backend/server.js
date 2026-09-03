@@ -42,6 +42,10 @@ app.use("/api/admin", adminRouter);
 app.use("/api/doctor", doctorRouter);
 app.use("/api/user", userRouter)
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ success: true, status: "ok" });
+});
+
 app.get("/", (req, res) => {
   res.send("Our API is working fine");
 });
