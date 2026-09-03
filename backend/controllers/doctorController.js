@@ -48,7 +48,7 @@ const logInDoctor = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const doctor = await doctorModel.findOne({email});
+    const doctor = await doctorModel.findOne({ email });
     if (!doctor) {
       return res
         .status(404)
@@ -78,7 +78,7 @@ const logInDoctor = async (req, res) => {
 
 // API to get doctor appointments for doctor panel
 
-const appointmentsDoctor = async(req, res) => {
+const appointmentsDoctor = async (req, res) => {
   try {
     const appointments = await appointmentModel.find({ docId: req.user });
     res.status(200).json({
@@ -86,7 +86,6 @@ const appointmentsDoctor = async(req, res) => {
       appointments,
       message: "Successfully fetched doctor's all appointments",
     });
-
   } catch (error) {
     console.log("Error while fetching doctor appointments: ", error.message);
     return res.status(500).json({
@@ -94,7 +93,7 @@ const appointmentsDoctor = async(req, res) => {
       message: error.message || "Unable to login doctor",
     });
   }
-}
+};
 
 // API to mark appointment completed for doctor panel
 
@@ -104,20 +103,23 @@ const appointmentComplete = async (req, res) => {
     const { appointmentId } = req.body;
 
     const appointmentData = await appointmentModel.findById(appointmentId);
-    if (appointmentData && appointmentData.docId.toString() === docId.toString()) {
-      await appointmentModel.findByIdAndUpdate(appointmentId, {isCompleted: true})
+    if (
+      appointmentData &&
+      appointmentData.docId.toString() === docId.toString()
+    ) {
+      await appointmentModel.findByIdAndUpdate(appointmentId, {
+        isCompleted: true,
+      });
       return res.status(200).json({
         success: true,
-        message: "Successfully marked appointment completed"
-
-      })
+        message: "Successfully marked appointment completed",
+      });
     } else {
       return res.status(400).json({
         success: false,
-        message: "Mark failed"
-      })
+        message: "Mark failed",
+      });
     }
-
   } catch (error) {
     console.log("Error while marking complete of appointment: ", error.message);
     return res.status(500).json({
@@ -125,7 +127,7 @@ const appointmentComplete = async (req, res) => {
       message: error.message || "Unable to mark complete appointment",
     });
   }
-}
+};
 
 // API to cancel appointment for doctor panel
 
@@ -135,20 +137,23 @@ const appointmentCancel = async (req, res) => {
     const { appointmentId } = req.body;
 
     const appointmentData = await appointmentModel.findById(appointmentId);
-    if (appointmentData && appointmentData.docId.toString() === docId.toString()) {
-      await appointmentModel.findByIdAndUpdate(appointmentId, {cancelled: true})
+    if (
+      appointmentData &&
+      appointmentData.docId.toString() === docId.toString()
+    ) {
+      await appointmentModel.findByIdAndUpdate(appointmentId, {
+        cancelled: true,
+      });
       return res.status(200).json({
         success: true,
-        message: "Successfully marked appointment cancelled"
-
-      })
+        message: "Successfully marked appointment cancelled",
+      });
     } else {
       return res.status(400).json({
         success: false,
-        message: "Cancellation failed"
-      })
+        message: "Cancellation failed",
+      });
     }
-
   } catch (error) {
     console.log("Error while marking complete of appointment: ", error.message);
     return res.status(500).json({
@@ -156,5 +161,59 @@ const appointmentCancel = async (req, res) => {
       message: error.message || "Unable to mark complete appointment",
     });
   }
-}
-export { changeAvailability, doctorList, logInDoctor, appointmentsDoctor, appointmentComplete, appointmentCancel };
+};
+
+//APT to get dashboard data for doctor panel
+
+const doctordashboard = async (req, res) => {
+  try {
+    const docId = req.user;
+    const appointments = await appointmentModel.find({ docId });
+    let earnings = 0;
+    appointments.map((item) => {
+      if (item.isCompleted || item.payment) {
+        earnings += item.amount;
+      }
+    });
+
+    let patients = [];
+
+    appointments.map((item) => {
+      if (!patients.includes(item.userId)) {
+        patients.push(item.userId);
+      }
+    });
+
+    const dashData = {
+      earnings,
+      appointments: appointments.length,
+      patients: patients.length,
+      latestAppointments: [...appointments].reverse().slice(0, 5),
+    };
+
+    return res.status(200).json({
+      success: true,
+      dashData,
+      message: "Successfully fetched doctor Dashboard data",
+    });
+  } catch (error) {
+    console.log(
+      "Error while getting appointment data for doctor dashboard: ",
+      error.message,
+    );
+    return res.status(500).json({
+      success: false,
+      message:
+        error.message || "Unable to get appointment data for doctor dashboard",
+    });
+  }
+};
+export {
+  changeAvailability,
+  doctorList,
+  logInDoctor,
+  appointmentsDoctor,
+  appointmentComplete,
+  appointmentCancel,
+  doctordashboard
+};

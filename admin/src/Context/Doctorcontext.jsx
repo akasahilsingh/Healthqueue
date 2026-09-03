@@ -8,6 +8,7 @@ const DoctorContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [dtoken, setdToken] = useState(localStorage.getItem("dtoken") || "");
   const [appointments, setAppointments] = useState([]);
+  const [dashData, setDashData] = useState(false);
 
   const getAppointments = async () => {
     try {
@@ -59,6 +60,20 @@ const DoctorContextProvider = (props) => {
       toast.error(error.message);
     }
   };
+
+  const getDashData = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/doctor/dashboard`, {
+        headers: { dtoken },
+      });
+      if (data.success) {
+        setDashData(data.dashData);
+        console.log(data.dashData)
+      } else [toast.error(data.message)];
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
   const value = {
     dtoken,
     setdToken,
@@ -68,6 +83,9 @@ const DoctorContextProvider = (props) => {
     getAppointments,
     completeAppointment,
     cancelAppointment,
+    dashData,
+    setDashData,
+    getDashData,
   };
 
   return (
