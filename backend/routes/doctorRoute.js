@@ -1,6 +1,7 @@
 import express from 'express'
 import upload from '../middlewares/multer.js'
-import { doctorList } from "../controllers/doctorController.js"
+import { appointmentCancel, appointmentComplete, appointmentsDoctor, doctorList, logInDoctor } from "../controllers/doctorController.js"
+import authDoctor from '../middlewares/authDoctor.js'
 
 const doctorRouter = express.Router()
 
@@ -10,6 +11,10 @@ const doctorRouter = express.Router()
 //     next();
 // }, addDoctor)
 doctorRouter.get("/list", doctorList)
+doctorRouter.post("/login", logInDoctor)
+doctorRouter.get("/appointment", authDoctor, appointmentsDoctor)
+doctorRouter.post("/complete-appointment", authDoctor, appointmentComplete)
+doctorRouter.post("/cancel-appointment", authDoctor, appointmentCancel)
 
 
 export default doctorRouter;

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { assets } from "../../../../frontend/src/assets/assets";
+import { assets } from "../../assets/assets";
 import { AdminContext } from "../../Context/AdminContext";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -106,7 +106,7 @@ const AddDoctor = () => {
           <label htmlFor="doc-img">
             <img
               className="w-16 bg-gray-100 rounded-full cursor-pointer object-cover"
-              src={previewUrl || assets.upload_icon}
+              src={previewUrl || assets.upload_area}
               alt="Upload doctor"
             />
           </label>

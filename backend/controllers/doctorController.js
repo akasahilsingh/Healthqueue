@@ -1,4 +1,7 @@
 import doctorModel from "../models/doctorModel.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import appointmentModel from "../models/appointmentModel.js";
 
 const changeAvailability = async (req, res) => {
   try {
@@ -40,4 +43,118 @@ const doctorList = async (req, res) => {
     });
   }
 };
-export { changeAvailability, doctorList };
+
+const logInDoctor = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const doctor = await doctorModel.findOne({email});
+    if (!doctor) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Invalid credentials" });
+    }
+    const isMatch = await bcrypt.compare(password, doctor.password);
+    if (!isMatch) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET);
+    return res.status(200).json({
+      success: true,
+      token,
+      message: "Successfully logged in!",
+    });
+  } catch (error) {
+    console.log("Error while login doctor: ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to login doctor",
+    });
+  }
+};
+
+// API to get doctor appointments for doctor panel
+
+const appointmentsDoctor = async(req, res) => {
+  try {
+    const appointments = await appointmentModel.find({ docId: req.user });
+    res.status(200).json({
+      success: true,
+      appointments,
+      message: "Successfully fetched doctor's all appointments",
+    });
+
+  } catch (error) {
+    console.log("Error while fetching doctor appointments: ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to login doctor",
+    });
+  }
+}
+
+// API to mark appointment completed for doctor panel
+
+const appointmentComplete = async (req, res) => {
+  try {
+    const docId = req.user;
+    const { appointmentId } = req.body;
+
+    const appointmentData = await appointmentModel.findById(appointmentId);
+    if (appointmentData && appointmentData.docId.toString() === docId.toString()) {
+      await appointmentModel.findByIdAndUpdate(appointmentId, {isCompleted: true})
+      return res.status(200).json({
+        success: true,
+        message: "Successfully marked appointment completed"
+
+      })
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Mark failed"
+      })
+    }
+
+  } catch (error) {
+    console.log("Error while marking complete of appointment: ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to mark complete appointment",
+    });
+  }
+}
+
+// API to cancel appointment for doctor panel
+
+const appointmentCancel = async (req, res) => {
+  try {
+    const docId = req.user;
+    const { appointmentId } = req.body;
+
+    const appointmentData = await appointmentModel.findById(appointmentId);
+    if (appointmentData && appointmentData.docId.toString() === docId.toString()) {
+      await appointmentModel.findByIdAndUpdate(appointmentId, {cancelled: true})
+      return res.status(200).json({
+        success: true,
+        message: "Successfully marked appointment cancelled"
+
+      })
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Cancellation failed"
+      })
+    }
+
+  } catch (error) {
+    console.log("Error while marking complete of appointment: ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to mark complete appointment",
+    });
+  }
+}
+export { changeAvailability, doctorList, logInDoctor, appointmentsDoctor, appointmentComplete, appointmentCancel };
