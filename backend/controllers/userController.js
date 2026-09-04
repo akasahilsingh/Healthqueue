@@ -337,10 +337,15 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
-const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+const getRazorpayInstance = () => {
+  const { RAZORPAY_KEY_ID: keyId, RAZORPAY_KEY_SECRET: keySecret } = process.env;
+
+  if (!keyId || !keySecret) {
+    throw new Error("Razorpay environment variables are not configured");
+  }
+
+  return new Razorpay({ key_id: keyId, key_secret: keySecret });
+};
 const razorpayCurrency = (process.env.CURRENCY || "INR").toUpperCase();
 
 const paymentRazorPay = async (req, res) => {
@@ -371,7 +376,7 @@ const paymentRazorPay = async (req, res) => {
       receipt: String(appointmentId),
     };
 
-    const order = await razorpayInstance.orders.create(options);
+    const order = await getRazorpayInstance().orders.create(options);
     return res.status(200).json({
       success: true,
       order,
@@ -391,7 +396,7 @@ const paymentRazorPay = async (req, res) => {
 const verifyRazorpay = async (req, res) => {
   try {
     const { razorpay_order_id } = req.body;
-    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+    const orderInfo = await getRazorpayInstance().orders.fetch(razorpay_order_id);
 
     // console.log(orderInfo);
     if (orderInfo.status === "paid") {
