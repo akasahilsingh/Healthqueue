@@ -8,7 +8,11 @@ export const AppContext = createContext();
 
 const AppContextProvider = (prop) => {
   const currencySymbol = "₹";
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.DEV
+      ? "http://localhost:4000"
+      : "https://healthqueue-knpw.onrender.com");
   const [doctors, setDoctors] = useState([]);
   const [token, setToken] = useState(() => localStorage.getItem("token") || "");
   const [userData, setUserData] = useState(false);

@@ -12,7 +12,11 @@ const AdminContextProvider = (props) => {
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.DEV
+      ? "http://localhost:4000"
+      : "https://healthqueue-knpw.onrender.com");
 
   const getAllDoctors = async () => {
     try {

@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/errorMessage";
 import { useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
@@ -23,6 +24,7 @@ const MyAppointments = () => {
     "Nov",
     "Dec",
   ];
+  const navigate = useNavigate();
 
   const slotsDateFormat = (slotDate) => {
     if (!slotDate) return "Date unavailable";
@@ -74,6 +76,58 @@ const MyAppointments = () => {
     }
   };
 
+  const initPay = (order, keyId) => {
+    if (!keyId || !order?.id || !order?.amount || !order?.currency) {
+      toast.error("Payment order is not configured correctly");
+      return;
+    }
+
+    if (!window.Razorpay) {
+      toast.error("Payment service is unavailable. Please try again");
+      return;
+    }
+
+    if (!keyId.startsWith("rzp_test_") && !keyId.startsWith("rzp_live_")) {
+      toast.error("Razorpay key is not configured");
+      return;
+    }
+
+    const options = {
+      key: keyId,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Appointment Payment",
+      description: "Appointment Payment",
+      order_id: order.id,
+      handler: async (response) => {
+        try {
+          const { data } = await axios.post(
+            `${backendUrl}/api/user/verify-razorpay`,
+            response,
+            { headers: { token } },
+          );
+          if (data.success) {
+            toast.success(data.message);
+            getUserAppointment();
+            navigate("/my-appointments");
+          } else {
+            toast.error(data.message || "Payment verification failed");
+          }
+        } catch (error) {
+          toast.error(getErrorMessage(error, backendUrl));
+        }
+      },
+      modal: {
+        ondismiss: () => toast.info("Payment window closed"),
+      },
+      notes: {
+        appointment_id: order.receipt,
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
   const appointmentRazorPay = async (appointmentId) => {
     try {
       const { data } = await axios.post(
@@ -82,7 +136,7 @@ const MyAppointments = () => {
         { headers: { token } },
       );
       if (data.success) {
-        console.log(data);
+        initPay(data.order, data.keyId);
       } else {
         toast.error(data.message);
       }
@@ -134,6 +188,7 @@ const MyAppointments = () => {
 
               <div></div>
               <div className="flex flex-col gap-2 justify-end">
+                {!appointment.cancelled && appointment.payment && <button className="sm:min-w-48 py-2 border rounded text-stone-500 bg-indigo-50">Paid</button>}
                 {appointment.cancelled ? (
                   <button className="sm:min-w-48 py-2 border border-red-500 rounded text-red-500">
                     Appointment Cancelled

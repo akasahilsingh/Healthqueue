@@ -6,7 +6,11 @@ import { getErrorMessage } from "../utils/errorMessage";
 export const DoctorContext = createContext();
 
 const DoctorContextProvider = (props) => {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.DEV
+      ? "http://localhost:4000"
+      : "https://healthqueue-knpw.onrender.com");
   const [dtoken, setdToken] = useState(localStorage.getItem("dtoken") || "");
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
