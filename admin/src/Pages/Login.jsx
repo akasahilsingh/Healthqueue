@@ -43,6 +43,13 @@ const Login = () => {
         }
       }
     } catch (error) {
+      console.error("Admin login request failed", {
+        message: error.message,
+        code: error.code,
+        status: error.response?.status,
+        url: error.config?.url,
+        response: error.response?.data,
+      });
       toast.error(getErrorMessage(error, backendUrl));
     }
   };
