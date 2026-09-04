@@ -218,6 +218,20 @@ const bookAppointment = async (req, res) => {
       });
     }
 
+    const existingAppointment = await appointmentModel.findOne({
+      userId,
+      slotDate,
+      slotTime,
+      cancelled: { $ne: true },
+    });
+
+    if (existingAppointment) {
+      return res.status(400).json({
+        success: false,
+        message: "You already have an appointment at this time",
+      });
+    }
+
     const { slots_booked: _, ...docDataWithoutSlots } = docData.toObject();
 
     const appointment = {
