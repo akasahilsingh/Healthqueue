@@ -20,24 +20,9 @@ HealthQueue is a **three-tier web application** that connects patients with veri
 - [Tech Stack](#️-tech-stack)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Environment Variables](#environment-variables)
-  - [Installation](#installation)
-  - [Running the App](#running-the-app)
 - [API Reference](#-api-reference)
-  - [Admin Routes](#admin-routes----apiadmin)
-  - [Doctor Routes](#doctor-routes----apidoctor)
-  - [User Routes](#user-routes----apiuser)
 - [Pages & Routes](#️-pages--routes)
-  - [Patient Frontend](#patient-frontend)
-  - [Admin Panel](#admin-panel-1)
 - [Data Models](#-data-models)
-  - [User (Patient)](#user-patient)
-  - [Doctor](#doctor)
-  - [Appointment](#appointment)
-- [Admin Panel](#-admin-panel)
-- [Doctor Portal](#-doctor-portal)
-- [Supported Specialities](#-supported-specialities)
 - [Deployment](#️-deployment)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -261,8 +246,9 @@ ADMIN_PASSWORD=YourSecurePassword
 # ── JWT ─────────────────────────────────────────────
 JWT_SECRET=your_super_secret_jwt_key
 
-# ── CORS (Production only) ───────────────────────────
+# ── CORS ────────────────────────────────────────────
 FRONTEND_URL=https://your-frontend-domain.vercel.app
+ADMIN_FRONTEND_URL=https://your-admin-domain.vercel.app
 ```
 
 > ⚠️ **Never commit your `.env` file to version control.** It is already listed in `.gitignore`.
@@ -283,21 +269,23 @@ VITE_BACKEND_URL=http://localhost:4000
 
 ### Installation
 
-Install dependencies for all three packages:
+Install dependencies for each application:
 
 ```bash
 # 1. Backend
 cd backend
-npm install
+npm ci
 
 # 2. Patient Frontend
 cd ../frontend
-npm install
+npm ci
 
 # 3. Admin & Doctor Panel
 cd ../admin
-npm install
+npm ci
 ```
+
+Use `npm install` instead of `npm ci` when intentionally updating a lockfile.
 
 ---
 
@@ -326,13 +314,15 @@ npm run dev
 # ✓ Dashboard running at http://localhost:5174
 ```
 
-> 💡 **Tip:** The backend uses `nodemon` for hot-reloading during development. Use `npm start` (`node server.js`) for production.
+> **Tip:** The backend uses `nodemon` for hot-reloading during development. Use `npm start` (`node server.js`) for production.
 
 ---
 
 ## 📡 API Reference
 
 All endpoints are prefixed with `/api`. The server runs on `http://localhost:4000` by default.
+
+Use `GET /api/health` to verify that the API is running.
 
 > All **protected routes** require the HTTP header: `Authorization: Bearer <token>`
 
@@ -554,7 +544,7 @@ Email:    admin@healthqueue.com
 Password: Admin@123
 ```
 
-> 🔒 Change these in `backend/.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`) before deploying to production.
+> 🔒 Change these in `backend/.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`) before deploying to production. Use strong, unique values before deploying to production.
 
 **How authentication works:**
 1. Admin submits credentials → backend validates against `.env` values.
@@ -603,6 +593,24 @@ The project is configured for deployment with the following targets:
 2. Set `VITE_BACKEND_URL` in `frontend/.env` and `admin/.env` to your Render backend URL.
 3. Use `npm start` (`node server.js`) as the Render start command for the backend.
 4. Use `npm run build` + serve the `dist/` folder for Vercel deployments (configured automatically via `vercel.json`).
+
+### Docker
+
+The root `Dockerfile` builds the frontend, admin panel, and backend from a single repository-root build context. Build the image from the repository root:
+
+```bash
+docker build -t healthqueue .
+```
+
+Run the container on port `4000`:
+
+```bash
+docker run --env-file backend/.env -p 4000:4000 healthqueue
+```
+
+The API is available at `http://localhost:4000`, including the health check at `http://localhost:4000/api/health`. The container requires the backend environment variables for MongoDB, Cloudinary, JWT authentication, and CORS origins.
+
+For production, deploy the patient frontend, admin panel, and backend as separate services. The current Dockerfile copies both frontend build outputs into the backend's `public/` directory, so it is intended as a basic combined image rather than a complete multi-site production server.
 
 ---
 

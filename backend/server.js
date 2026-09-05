@@ -15,6 +15,8 @@ connectDB();
 connectCloudinary();
 
 // Middleware
+
+app.use(express.static("public"));
 app.use(express.json());
 const allowedOrigins = [
   process.env.FRONTEND_URL?.replace(/\/$/, ""),
@@ -42,7 +44,7 @@ app.use(
 app.use("/api/admin", adminRouter);
 //http://localhost:4000/api/admin/
 app.use("/api/doctor", doctorRouter);
-app.use("/api/user", userRouter)
+app.use("/api/user", userRouter);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ success: true, status: "ok" });
