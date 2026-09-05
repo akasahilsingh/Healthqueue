@@ -128,9 +128,12 @@ const Doctors = () => {
                 key={index}
               >
                 <img
-                  className="bg-blue-50"
+                  className="bg-blue-50 w-full aspect-square object-cover"
                   src={doctor.image}
-                  alt="doctors image"
+                  alt={doctor.name}
+                  width="320"
+                  height="320"
+                  loading="lazy"
                 />
                 <div className="p-4">
                   <div

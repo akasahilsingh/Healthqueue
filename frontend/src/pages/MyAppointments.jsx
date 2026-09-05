@@ -7,6 +7,24 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+let razorpayScript;
+
+const loadRazorpay = () => {
+  if (window.Razorpay) return Promise.resolve(true);
+  if (razorpayScript) return razorpayScript;
+
+  razorpayScript = new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
+  return razorpayScript;
+};
+
 const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
@@ -130,6 +148,12 @@ const MyAppointments = () => {
   };
   const appointmentRazorPay = async (appointmentId) => {
     try {
+      const isRazorpayReady = await loadRazorpay();
+      if (!isRazorpayReady) {
+        toast.error("Payment service is unavailable. Please try again");
+        return;
+      }
+
       const { data } = await axios.post(
         backendUrl + "/api/user/payment-razorpay",
         { appointmentId },
@@ -166,9 +190,12 @@ const MyAppointments = () => {
             >
               <div>
                 <img
-                  className="w-32 bg-indigo-50"
+                  className="w-32 aspect-square object-cover bg-indigo-50"
                   src={doctor.image}
                   alt={doctor.name}
+                  width="128"
+                  height="128"
+                  loading="lazy"
                 />
               </div>
               <div className="flex-1 text-sm text-zinc-600">

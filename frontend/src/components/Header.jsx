@@ -11,9 +11,11 @@ const Header = () => {
         </p>
         <div className="flex flex-col md:flex-row items-center gap-3 text-white text-sm font-light">
           <img
-            className="w-28"
+            className="w-28 h-auto"
             src={assets.group_profiles}
             alt="image of group of doctors"
+            width="112"
+            height="32"
           />
           <p>
             Simply browse through our extensive list of trusted doctors,
@@ -35,6 +37,9 @@ const Header = () => {
           className="w-full md:absolute bottom-0 h-auto rounded-lg"
           src={assets.header_img}
           alt="header doctor images"
+          width="600"
+          height="600"
+          fetchPriority="high"
         />
       </div>
     </div>
