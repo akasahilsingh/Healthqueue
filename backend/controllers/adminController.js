@@ -10,22 +10,6 @@ import userModel from "../models/userModel.js";
 
 const addDoctor = async (req, res) => {
   try {
-    console.log("Headers:", req.headers["content-type"]);
-    console.log("Full Request Body:", req.body);
-    console.log("File:", req.file);
-
-    // Log each field individually
-    console.log("Individual fields:");
-    console.log("name:", req.body.name);
-    console.log("email:", req.body.email);
-    console.log("password:", req.body.password);
-    console.log("speciality:", req.body.speciality);
-    console.log("degree:", req.body.degree);
-    console.log("experience:", req.body.experience);
-    console.log("about:", req.body.about);
-    console.log("fees:", req.body.fees);
-    console.log("address:", req.body.address);
-
     const {
       name,
       email,
@@ -53,18 +37,18 @@ const addDoctor = async (req, res) => {
       !address ||
       !imageFile
     ) {
-      console.log("Missing fields:", {
-        name,
-        email,
-        password,
-        speciality,
-        degree,
-        experience,
-        about,
-        fees,
-        address,
-        imageFile: !!imageFile,
-      });
+      // console.log("Missing fields:", {
+      //   name,
+      //   email,
+      //   password,
+      //   speciality,
+      //   degree,
+      //   experience,
+      //   about,
+      //   fees,
+      //   address,
+      //   imageFile: !!imageFile,
+      // });
       return res.json({ success: false, message: "All fields are required" });
     }
 

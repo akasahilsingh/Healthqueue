@@ -47,6 +47,12 @@ const appointmentSchema = new Schema({
   },
 });
 
+// Indexes — one per query pattern used in controllers.
+// Without these, every .find() is a full collection scan (O(n)).
+appointmentSchema.index({ userId: 1, date: -1 });   // listAppointment — user appointments sorted by date
+appointmentSchema.index({ docId: 1 });               // appointmentsDoctor — doctor's appointment list
+appointmentSchema.index({ slotDate: 1, docId: 1 }); // slot availability check in bookAppointment
+
 const appointmentModel =  mongoose.models.appointmentModel || mongoose.model("appointmentModel", appointmentSchema);
 
 export default appointmentModel
