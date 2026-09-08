@@ -185,23 +185,11 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    // Fetch doctor and user in parallel for speed
-    const [docData, user] = await Promise.all([
-      doctorModel.findById(docId).select("-password"),
-      userModel.findById(userId).select("-password"),
-    ]);
-
+    const docData = await doctorModel.findById(docId).select("-password");
     if (!docData) {
       return res.status(404).json({
         success: false,
         message: "Doctor not found",
-      });
-    }
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
       });
     }
 
@@ -212,34 +200,35 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // 1.4 — Atomic slot booking (eliminates race condition)
-    // Old approach: read slots_booked → check → save appointment → update slots
-    // Problem: two concurrent requests both read the slot as "free" before
-    // either saves — resulting in a double booking.
-    //
-    // Fix: a single MongoDB findOneAndUpdate that atomically checks the
-    // condition ($ne: slot must NOT exist) and pushes — in one round-trip.
-    // If the slot was just taken by a concurrent request, MongoDB returns
-    // null and we respond with 409 Conflict. No race window.
-    // ─────────────────────────────────────────────────────────────────
-    const atomicResult = await doctorModel.findOneAndUpdate(
-      {
-        _id: docId,
-        availability: true, // re-check availability atomically too
-        [`slots_booked.${slotDate}`]: { $ne: slotTime }, // slot must NOT already exist
-      },
-      {
-        $push: { [`slots_booked.${slotDate}`]: slotTime },
-      },
-      { new: true },
-    );
+    const slotsBooked = docData.slots_booked || {};
+    const bookedSlotsForDate = slotsBooked[slotDate] || [];
 
-    if (!atomicResult) {
-      // Either the doctor became unavailable or the slot was just taken
-      return res.status(409).json({
+    if (bookedSlotsForDate.includes(slotTime)) {
+      return res.status(400).json({
         success: false,
-        message: "This slot is no longer available — please choose another time",
+        message: "This slot is already booked",
+      });
+    }
+
+    const user = await userModel.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const existingAppointment = await appointmentModel.findOne({
+      userId,
+      slotDate,
+      slotTime,
+      cancelled: { $ne: true },
+    });
+
+    if (existingAppointment) {
+      return res.status(400).json({
+        success: false,
+        message: "You already have an appointment at this time",
       });
     }
 
@@ -264,6 +253,15 @@ const bookAppointment = async (req, res) => {
 
     const newAppointment = new appointmentModel(appointment);
     await newAppointment.save();
+
+    const updatedSlotsBooked = {
+      ...slotsBooked,
+      [slotDate]: [...bookedSlotsForDate, slotTime],
+    };
+
+    await doctorModel.findByIdAndUpdate(docId, {
+      slots_booked: updatedSlotsBooked,
+    });
 
     return res.status(201).json({
       success: true,
