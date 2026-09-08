@@ -28,6 +28,9 @@ const loadRazorpay = () => {
 const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
   const months = [
     "Jan",
     "Feb",
@@ -57,23 +60,28 @@ const MyAppointments = () => {
     return `${day} ${months[month - 1] || ""} ${year}`;
   };
 
-  const getUserAppointment = useCallback(async () => {
-    try {
-      const { data } = await axios.get(backendUrl + "/api/user/appointments", {
-        headers: { token },
-      });
-      if (data.success) {
-        const fetchedAppointments = Array.isArray(data.appointments)
-          ? data.appointments
-          : [];
-        setAppointments(fetchedAppointments);
-      } else {
-        toast.error(data.message);
+  const getUserAppointment = useCallback(
+    async (nextPage = page, nextLimit = limit) => {
+      try {
+        const { data } = await axios.get(
+          `${backendUrl}/api/user/appointments?page=${nextPage}&limit=${nextLimit}`,
+          { headers: { token } },
+        );
+        if (data.success) {
+          const fetchedAppointments = Array.isArray(data.appointments)
+            ? data.appointments
+            : [];
+          setAppointments(fetchedAppointments);
+          setPagination(data.pagination || null);
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error(getErrorMessage(error, backendUrl));
       }
-    } catch (error) {
-      toast.error(getErrorMessage(error, backendUrl));
-    }
-  }, [backendUrl, token]);
+    },
+    [backendUrl, token, page, limit],
+  );
 
   const cancelAppointment = async (appointmentId) => {
     try {
@@ -171,9 +179,9 @@ const MyAppointments = () => {
 
   useEffect(() => {
     if (token) {
-      getUserAppointment();
+      getUserAppointment(page, limit);
     }
-  }, [token, getUserAppointment]);
+  }, [token, page, limit, getUserAppointment]);
 
   return (
     <div>
@@ -247,6 +255,36 @@ const MyAppointments = () => {
           );
         })}
       </div>
+
+      {pagination && (
+        <div className="flex items-center justify-center gap-3 py-4">
+          <button
+            className="px-3 py-1 border rounded disabled:opacity-40"
+            disabled={!pagination.hasPrevPage}
+            onClick={() => {
+              const nextPage = pagination.currentPage - 1;
+              setPage(nextPage);
+              getUserAppointment(nextPage, pagination.limit);
+            }}
+          >
+            Prev
+          </button>
+          <span className="text-sm font-medium">
+            Page {pagination.currentPage} / {pagination.totalPages}
+          </span>
+          <button
+            className="px-3 py-1 border rounded disabled:opacity-40"
+            disabled={!pagination.hasNextPage}
+            onClick={() => {
+              const nextPage = pagination.currentPage + 1;
+              setPage(nextPage);
+              getUserAppointment(nextPage, pagination.limit);
+            }}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

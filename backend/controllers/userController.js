@@ -279,6 +279,9 @@ const bookAppointment = async (req, res) => {
 const listAppointment = async (req, res) => {
   try {
     const userId = req.user?.id;
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
+    const skipIndex = (page - 1) * limit;
 
     if (!userId) {
       return res.status(401).json({
@@ -287,13 +290,29 @@ const listAppointment = async (req, res) => {
       });
     }
 
-    const appointments = await appointmentModel
-      .find({ userId })
-      .sort({ date: -1 });
+    const [appointments, totalAppointments] = await Promise.all([
+      appointmentModel
+        .find({ userId })
+        .sort({ date: -1 })
+        .skip(skipIndex)
+        .limit(limit)
+        .lean(),
+      appointmentModel.countDocuments({ userId }),
+    ]);
+
+    const totalPages = Math.ceil(totalAppointments / limit);
 
     return res.status(200).json({
       success: true,
       appointments,
+      pagination: {
+        totalAppointments,
+        limit,
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
       message: "Appointment fetched successfully",
     });
   } catch (error) {
