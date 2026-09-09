@@ -3,7 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
-import "./config/redis.js";
+// Redis is optional. The backend now degrades safely when REDIS_URL is absent.
 // import adminRouter from "./routes/doctorRoute.js";
 import adminRouter from "./routes/adminRoute.js";
 import doctorRouter from "./routes/doctorRoute.js";

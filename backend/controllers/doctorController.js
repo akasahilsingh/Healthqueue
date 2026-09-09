@@ -48,20 +48,43 @@ const logoutDoctor = async (req, res) => {
 
 const doctorList = async (req, res) => {
   try {
-    // Serve from Redis cache if available
-    const cached = await redis.get(DOCTOR_LIST_CACHE_KEY);
-    if (cached) {
-      return res.status(200).json(JSON.parse(cached));
+    if (redis) {
+      try {
+        const cached = await redis.get(DOCTOR_LIST_CACHE_KEY);
+        if (cached) {
+          return res.status(200).json(JSON.parse(cached));
+        }
+      } catch (cacheError) {
+        console.warn("Doctor list Redis cache read failed:", cacheError.message);
+      }
     }
 
-    // Cache miss — fetch from DB, store in Redis
-    const doctors = await doctorModel.find({}).select("-password -email").lean();
-    const payload = { success: true, doctors, message: "Successfully fetched all doctors" };
-    await redis.setex(DOCTOR_LIST_CACHE_KEY, DOCTOR_LIST_TTL, JSON.stringify(payload));
+    const doctors = await doctorModel
+      .find({})
+      .select("-password -email")
+      .lean();
 
-    res.status(200).json(payload);
+    const payload = {
+      success: true,
+      doctors,
+      message: "Successfully fetched all doctors",
+    };
+
+    if (redis) {
+      try {
+        await redis.setex(
+          DOCTOR_LIST_CACHE_KEY,
+          DOCTOR_LIST_TTL,
+          JSON.stringify(payload),
+        );
+      } catch (cacheWriteError) {
+        console.warn("Doctor list Redis cache write failed:", cacheWriteError.message);
+      }
+    }
+
+    return res.status(200).json(payload);
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.message || "Not able to fetch doctors",
     });

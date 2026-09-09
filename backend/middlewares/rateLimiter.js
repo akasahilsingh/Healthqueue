@@ -1,9 +1,13 @@
 import redis from "../config/redis.js";
 
-// Fixed-window rate limiter backed by Redis.
+// Fixed-window rate limiter backed by Redis when REDIS_URL is configured.
 const createRateLimiter = ({ keyGenerator, prefix, windowSeconds, maxRequests }) => {
   return async (req, res, next) => {
     try {
+      if (!redis) {
+        return next();
+      }
+
       const identifier = keyGenerator(req);
 
       if (!identifier) {
@@ -27,10 +31,10 @@ const createRateLimiter = ({ keyGenerator, prefix, windowSeconds, maxRequests })
         });
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error("Rate limiter error:", error.message);
-      next();
+      return next();
     }
   };
 };
