@@ -41,7 +41,7 @@ HealthQueue is composed of three independently-running applications that communi
 
 ![HealthQueue Architecture Diagram](docs/healthque_architecture.svg)
 
-> **Diagram notes:** The flow goes — Client browsers → Vercel CDN (static hosting) → Express API (Middleware → Routes → Controllers) → Redis cache (cache-hit path) / MongoDB Atlas (cache-miss path). External services **Cloudinary** (image storage) and **Razorpay** (payment gateway) are also called from the Controllers layer but are omitted from this diagram for clarity.
+> **Diagram notes:** The flow goes — Client browsers → Vercel CDN (static hosting) → Express API (Middleware → Routes → Controllers) → Redis cache (cache-hit path) / MongoDB Atlas (cache-miss path). External services **Cloudinary** (image storage) and **Razorpay** (payment gateway) are also called from the Controllers layer.
 
 ```
 Browser (Patient)          Browser (Admin / Doctor)
