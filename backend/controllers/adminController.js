@@ -241,6 +241,8 @@ const adminDashboard = async (req, res) => {
 export {
   addDoctor,
   loginAdmin,
+  logoutAdmin,
+  getAdminProfile,
   getAllDoctor,
   appointmentAdmin,
   appointmentCancel,
