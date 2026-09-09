@@ -1,14 +1,43 @@
 import axios from "axios";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/errorMessage";
 
 export const AdminContext = createContext();
 
 const AdminContextProvider = (props) => {
-  const [atoken, setAtoken] = useState(
-    localStorage.getItem("atoken") ? localStorage.getItem("atoken") : "",
-  );
+  const [adminData, setAdminData] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  let pendingApiCalls = 0;
+
+  if (!axios.__healthqueueAdminLoaderInstalled) {
+    axios.interceptors.request.use((config) => {
+      pendingApiCalls += 1;
+      setIsLoading(true);
+      return config;
+    });
+
+    axios.interceptors.response.use(
+      (response) => {
+        pendingApiCalls -= 1;
+        if (pendingApiCalls <= 0) {
+          setIsLoading(false);
+          pendingApiCalls = 0;
+        }
+        return response;
+      },
+      (error) => {
+        pendingApiCalls -= 1;
+        if (pendingApiCalls <= 0) {
+          setIsLoading(false);
+          pendingApiCalls = 0;
+        }
+        return Promise.reject(error);
+      },
+    );
+
+    axios.__healthqueueAdminLoaderInstalled = true;
+  }
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
@@ -18,17 +47,33 @@ const AdminContextProvider = (props) => {
       ? "http://localhost:4000"
       : "https://healthqueue-knpw.onrender.com");
 
+  const loadAdminProfileData = async () => {
+    try {
+      const { data } = await axios.get(
+        backendUrl + "/api/admin/profile",
+        { withCredentials: true },
+      );
+
+      if (data.success) {
+        setAdminData(data.profile);
+      } else {
+        setAdminData(false);
+      }
+    } catch (error) {
+      setAdminData(false);
+    }
+  };
+
   const getAllDoctors = async () => {
     try {
       const { data } = await axios.post(
         backendUrl + "/api/admin/all-doctor",
         {},
-        { headers: { atoken } },
+        { withCredentials: true },
       );
 
       if (data.success) {
         setDoctors(data.doctors);
-        console.log(data);
       } else {
         toast.error(data.message);
       }
@@ -43,7 +88,7 @@ const AdminContextProvider = (props) => {
       const { data } = await axios.post(
         backendUrl + "/api/admin/change-availibility",
         { docId },
-        { headers: { atoken } },
+        { withCredentials: true },
       );
       if (data.success) {
         toast.success(data.message);
@@ -58,14 +103,13 @@ const AdminContextProvider = (props) => {
 
   const getAllAppointments = async () => {
     try {
-      const { data } = await axios.get(backendUrl + "/api/admin/appointments", {
-        headers: { atoken },
-      });
+      const { data } = await axios.get(
+        backendUrl + "/api/admin/appointments",
+        { withCredentials: true },
+      );
 
       if (data.success) {
         setAppointments(data.appointments);
-        console.log(data.appointments);
-        // toast.success(data.message);
       } else {
         toast.error(data.message);
       }
@@ -79,14 +123,11 @@ const AdminContextProvider = (props) => {
       const { data } = await axios.post(
         backendUrl + "/api/admin/cancel-appointment",
         { appointmentId },
-        {
-          headers: { atoken },
-        },
+        { withCredentials: true },
       );
 
       if (data.success) {
         getAllAppointments();
-
         toast.success(data.message);
       } else {
         toast.error(data.message);
@@ -98,13 +139,13 @@ const AdminContextProvider = (props) => {
 
   const getDashData = async () => {
     try {
-      const { data } = await axios.get(backendUrl + "/api/admin/dashboard", {
-        headers: { atoken },
-      });
+      const { data } = await axios.get(
+        backendUrl + "/api/admin/dashboard",
+        { withCredentials: true },
+      );
 
       if (data.success) {
         setDashData(data.dashData);
-        console.log(data.dashData);
       } else {
         toast.error(data.message);
       }
@@ -112,9 +153,10 @@ const AdminContextProvider = (props) => {
       toast.error(getErrorMessage(error, backendUrl));
     }
   };
+
   const value = {
-    atoken,
-    setAtoken,
+    adminData,
+    setAdminData,
     backendUrl,
     doctors,
     setDoctors,
@@ -124,8 +166,15 @@ const AdminContextProvider = (props) => {
     setAppointments,
     getAllAppointments,
     cancelAppointment,
-    dashData, getDashData 
+    dashData,
+    getDashData,
+    loadAdminProfileData,
+    isLoading,
   };
+
+  useEffect(() => {
+    loadAdminProfileData();
+  }, []);
 
   return (
     <AdminContext.Provider value={value}>

@@ -5,6 +5,7 @@ import {
   getProfile,
   listAppointment,
   loginUser,
+  logoutUser,
   paymentRazorPay,
   registerUser,
   updateProfile,
@@ -16,12 +17,17 @@ import createRateLimiter from "../middlewares/rateLimiter.js";
 
 const userRouter = Router();
 
-const loginLimiter = createRateLimiter({
-  keyGenerator: (req) => req.ip,
-  prefix: "login",
-  windowSeconds: 15 * 60,
-  maxRequests: 5,
+// Per-account: blocks targeting one email from many IPs
+const loginLimiterByEmail = createRateLimiter({
+  keyGenerator: (req) => req.body?.email?.toLowerCase() || req.ip,
+  prefix: "login:email",
+  windowSeconds: 15 * 60,  // 15 min window
+  maxRequests: 10,          // 10 attempts per account
 });
+
+// NOTE: IP-based rate limiting belongs at the infrastructure layer
+// (Nginx, Cloudflare, AWS WAF) — not in Express app code.
+// The email limiter above is sufficient for per-account brute-force protection.
 
 const bookAppointmentLimiter = createRateLimiter({
   keyGenerator: (req) => req.user?.id,
@@ -31,7 +37,8 @@ const bookAppointmentLimiter = createRateLimiter({
 });
 
 userRouter.post("/register", registerUser);
-userRouter.post("/login", loginLimiter, loginUser);
+userRouter.post("/login", loginUser);
+userRouter.post("/logout", logoutUser);
 userRouter.get("/get-profile", authUser, getProfile);
 userRouter.post(
   "/update-profile",

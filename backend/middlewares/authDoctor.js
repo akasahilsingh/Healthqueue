@@ -1,27 +1,24 @@
 import jwt from "jsonwebtoken";
+import { parseCookies, ACCESS_TOKEN_COOKIE } from "../config/jwt.js";
 
-// Doctor authentication middleware
 const authDoctor = async (req, res, next) => {
   try {
-    const { dtoken } = req.headers;
-    if (!dtoken) {
-      return res.json({
+    const cookies = parseCookies(req.headers.cookie || "");
+    const token = cookies[ACCESS_TOKEN_COOKIE];
+
+    if (!token) {
+      return res.status(401).json({
         success: false,
         message: "Not authorised login again",
       });
     }
-    const decoded = jwt.verify(dtoken, process.env.JWT_SECRET);
-    // if (token_decode !== process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD) {
-    //   return res.json({
-    //     success: false,
-    //     message: "Not authorised login again",
-    //   });
-    // }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded.id;
     next();
   } catch (error) {
     console.log(error);
-    return res.json({ success: false, message: error.message });
+    return res.status(401).json({ success: false, message: error.message });
   }
 };
 

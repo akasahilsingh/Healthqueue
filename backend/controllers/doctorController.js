@@ -1,7 +1,8 @@
 import doctorModel from "../models/doctorModel.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import appointmentModel from "../models/appointmentModel.js";
+import redis from "../config/redis.js";
+import { setAuthCookies, clearAuthCookies } from "../config/jwt.js";
 
 const changeAvailability = async (req, res) => {
   try {
@@ -27,15 +28,38 @@ const changeAvailability = async (req, res) => {
   }
 };
 
+const DOCTOR_LIST_CACHE_KEY = "cache:doctor:list";
+const DOCTOR_LIST_TTL = 60; // seconds — refresh every minute
+
+const logoutDoctor = async (req, res) => {
+  try {
+    clearAuthCookies(res);
+    return res.status(200).json({
+      success: true,
+      message: "Doctor logged out successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 const doctorList = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({}).select("-password -email");
+    // Serve from Redis cache if available
+    const cached = await redis.get(DOCTOR_LIST_CACHE_KEY);
+    if (cached) {
+      return res.status(200).json(JSON.parse(cached));
+    }
 
-    res.status(200).json({
-      success: true,
-      doctors,
-      message: "Successfully fetched all doctors",
-    });
+    // Cache miss — fetch from DB, store in Redis
+    const doctors = await doctorModel.find({}).select("-password -email").lean();
+    const payload = { success: true, doctors, message: "Successfully fetched all doctors" };
+    await redis.setex(DOCTOR_LIST_CACHE_KEY, DOCTOR_LIST_TTL, JSON.stringify(payload));
+
+    res.status(200).json(payload);
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -61,10 +85,10 @@ const logInDoctor = async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET);
+    setAuthCookies(res, { id: doctor._id, role: "doctor", email: doctor.email });
+
     return res.status(200).json({
       success: true,
-      token,
       message: "Successfully logged in!",
     });
   } catch (error) {
@@ -144,6 +168,13 @@ const appointmentCancel = async (req, res) => {
       await appointmentModel.findByIdAndUpdate(appointmentId, {
         cancelled: true,
       });
+
+      await doctorModel.findByIdAndUpdate(appointmentData.docId, {
+        $pull: {
+          [`slots_booked.${appointmentData.slotDate}`]: appointmentData.slotTime,
+        },
+      });
+
       return res.status(200).json({
         success: true,
         message: "Successfully marked appointment cancelled",

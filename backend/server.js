@@ -18,7 +18,8 @@ connectCloudinary();
 // Middleware
 
 app.use(express.static("public"));
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 const allowedOrigins = [
   process.env.FRONTEND_URL?.replace(/\/$/, ""),
   process.env.ADMIN_FRONTEND_URL?.replace(/\/$/, ""),
@@ -38,6 +39,10 @@ app.use(
         callback(new Error("Origin not allowed by CORS"));
       }
     },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "token", "Cookie"],
+    exposedHeaders: ["Set-Cookie"],
   }),
 );
 

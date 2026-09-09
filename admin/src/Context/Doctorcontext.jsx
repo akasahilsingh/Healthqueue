@@ -1,26 +1,59 @@
 import axios from "axios";
-import { createContext, useCallback, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/errorMessage";
 
 export const DoctorContext = createContext();
 
 const DoctorContextProvider = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  let pendingApiCalls = 0;
+
+  if (!axios.__healthqueueDoctorLoaderInstalled) {
+    axios.interceptors.request.use((config) => {
+      pendingApiCalls += 1;
+      setIsLoading(true);
+      return config;
+    });
+
+    axios.interceptors.response.use(
+      (response) => {
+        pendingApiCalls -= 1;
+        if (pendingApiCalls <= 0) {
+          setIsLoading(false);
+          pendingApiCalls = 0;
+        }
+        return response;
+      },
+      (error) => {
+        pendingApiCalls -= 1;
+        if (pendingApiCalls <= 0) {
+          setIsLoading(false);
+          pendingApiCalls = 0;
+        }
+        return Promise.reject(error);
+      },
+    );
+
+    axios.__healthqueueDoctorLoaderInstalled = true;
+  }
+
   const backendUrl =
     import.meta.env.VITE_BACKEND_URL ||
     (import.meta.env.DEV
       ? "http://localhost:4000"
       : "https://healthqueue-knpw.onrender.com");
-  const [dtoken, setdToken] = useState(localStorage.getItem("dtoken") || "");
+
   const [appointments, setAppointments] = useState([]);
   const [dashData, setDashData] = useState(false);
   const [profileData, setProfileData] = useState(false);
 
   const getAppointments = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/doctor/appointment`, {
-        headers: { dtoken },
-      });
+      const { data } = await axios.get(
+        `${backendUrl}/api/doctor/appointment`,
+        { withCredentials: true },
+      );
       if (data.success) {
         setAppointments(data.appointments.reverse() || []);
       } else {
@@ -36,7 +69,7 @@ const DoctorContextProvider = (props) => {
       const { data } = await axios.post(
         `${backendUrl}/api/doctor/complete-appointment`,
         { appointmentId },
-        { headers: { dtoken } },
+        { withCredentials: true },
       );
       if (data.success) {
         toast.success(data.message);
@@ -54,7 +87,7 @@ const DoctorContextProvider = (props) => {
       const { data } = await axios.post(
         `${backendUrl}/api/doctor/cancel-appointment`,
         { appointmentId },
-        { headers: { dtoken } },
+        { withCredentials: true },
       );
       if (data.success) {
         toast.success(data.message);
@@ -69,13 +102,15 @@ const DoctorContextProvider = (props) => {
 
   const getDashData = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/doctor/dashboard`, {
-        headers: { dtoken },
-      });
+      const { data } = await axios.get(
+        `${backendUrl}/api/doctor/dashboard`,
+        { withCredentials: true },
+      );
       if (data.success) {
         setDashData(data.dashData);
-        console.log(data.dashData);
-      } else [toast.error(data.message)];
+      } else {
+        toast.error(data.message);
+      }
     } catch (error) {
       toast.error(getErrorMessage(error, backendUrl));
     }
@@ -83,20 +118,21 @@ const DoctorContextProvider = (props) => {
 
   const getProfileData = useCallback(async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/doctor/profile`, {
-        headers: { dtoken },
-      });
+      const { data } = await axios.get(
+        `${backendUrl}/api/doctor/profile`,
+        { withCredentials: true },
+      );
       if (data.success) {
         setProfileData(data.profileData);
-        console.log(data.profileData)
+      } else {
+        setProfileData(false);
       }
     } catch (error) {
-      toast.error(getErrorMessage(error, backendUrl));
+      setProfileData(false);
     }
-  }, [backendUrl, dtoken]);
+  }, [backendUrl]);
+
   const value = {
-    dtoken,
-    setdToken,
     backendUrl,
     appointments,
     setAppointments,
@@ -109,7 +145,12 @@ const DoctorContextProvider = (props) => {
     profileData,
     setProfileData,
     getProfileData,
+    isLoading,
   };
+
+  useEffect(() => {
+    getProfileData();
+  }, [getProfileData]);
 
   return (
     <DoctorContext.Provider value={value}>

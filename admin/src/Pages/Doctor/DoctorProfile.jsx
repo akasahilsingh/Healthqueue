@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { getErrorMessage } from "../../utils/errorMessage";
 
 const DoctorProfile = () => {
-  const { dtoken, backendUrl, profileData, setProfileData, getProfileData } =
+  const { backendUrl, profileData, setProfileData, getProfileData } =
     useContext(DoctorContext);
   const { currency } = useContext(AppContext);
 
@@ -22,7 +22,7 @@ const DoctorProfile = () => {
       const { data } = await axios.post(
         `${backendUrl}/api/doctor/update-profile`,
         updateData,
-        { headers: { dtoken } },
+        { withCredentials: true },
       );
       if (data.success) {
         toast.success(data.message);
@@ -37,10 +37,10 @@ const DoctorProfile = () => {
   };
 
   useEffect(() => {
-    if (dtoken) {
+    if (profileData) {
       getProfileData();
     }
-  }, [dtoken, getProfileData]);
+  }, [profileData, getProfileData]);
   return (
     profileData && (
       <div>

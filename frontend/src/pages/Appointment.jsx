@@ -9,7 +9,7 @@ import { getErrorMessage } from "../utils/errorMessage";
 
 const Appointment = () => {
   const { docId } = useParams();
-  const { doctors, currencySymbol, backendUrl, token, getDoctorsData } =
+  const { doctors, currencySymbol, backendUrl, userData, getDoctorsData } =
     useContext(AppContext);
   const [docInfo, setDocInfo] = useState(null);
   const [docSlots, setDocSlots] = useState([]);
@@ -83,7 +83,7 @@ const Appointment = () => {
   };
 
   const bookAppointment = async () => {
-    if (!token) {
+    if (!userData) {
       toast.warn("Login to book appointment");
       navigate("/login");
       return;
@@ -114,7 +114,7 @@ const Appointment = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/book-appointment",
         { docId, slotDate, slotTime },
-        { headers: { token } },
+        { withCredentials: true },
       );
 
       if (data.success) {

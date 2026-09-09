@@ -8,7 +8,7 @@ import { getErrorMessage } from "../utils/errorMessage";
 import axios from "axios";
 
 const MyProfile = () => {
-  const { userData, setUserData, token, backendUrl, loadUserProfileData } =
+  const { userData, setUserData, backendUrl, loadUserProfileData } =
     useContext(AppContext);
 
   const [isEdit, setIsEdit] = useState(false);
@@ -33,7 +33,7 @@ const MyProfile = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/update-profile",
         formData,
-        { headers: { token } },
+        { withCredentials: true },
       );
 
       if (data?.success) {

@@ -1,11 +1,14 @@
 import vaildator from "validator";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
-import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import Razorpay from "razorpay";
+import {
+  uploadTempFileToCloudinary,
+  deleteCloudinaryAssetByUrl,
+} from "../config/cloudinary.js";
+import { setAuthCookies, clearAuthCookies } from "../config/jwt.js";
 
 const registerUser = async (req, res) => {
   try {
@@ -43,11 +46,11 @@ const registerUser = async (req, res) => {
     const newUser = new userModel(userData);
     const user = await newUser.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    setAuthCookies(res, { id: user._id, role: "user", email: user.email });
 
     res.status(200).json({
       success: true,
-      token,
+      message: "User registered successfully",
     });
   } catch (error) {
     return res.status(500).json({
@@ -88,12 +91,26 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: userExists._id }, process.env.JWT_SECRET);
+    setAuthCookies(res, { id: userExists._id, role: "user", email: userExists.email });
 
     return res.status(200).json({
       success: true,
-      token,
       message: "Logged In successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const logoutUser = async (req, res) => {
+  try {
+    clearAuthCookies(res);
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
     });
   } catch (error) {
     return res.status(500).json({
@@ -114,7 +131,7 @@ const getProfile = async (req, res) => {
       });
     }
 
-    const user = await userModel.findById(userId).select("-password");
+    const user = await userModel.findById(userId).select("-password").lean();
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -139,12 +156,15 @@ const updateProfile = async (req, res) => {
     const { name, phone, address, dob, gender } = req.body;
     const userId = req.user?.id;
     const imageFile = req.file;
+
     if (!name.trim() || !phone.trim() || !dob.trim() || !gender.trim()) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
     }
+
+    const currentUser = await userModel.findById(userId).select("image");
 
     await userModel.findByIdAndUpdate(userId, {
       name: name.trim(),
@@ -155,11 +175,17 @@ const updateProfile = async (req, res) => {
     });
 
     if (imageFile) {
-      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-        resource_type: "image",
-      });
-      const imageUrl = imageUpload.secure_url;
+      const imageUrl = await uploadTempFileToCloudinary(imageFile, "image");
+
       await userModel.findByIdAndUpdate(userId, { image: imageUrl });
+
+      if (
+        currentUser?.image &&
+        currentUser.image !== imageUrl &&
+        !currentUser.image.startsWith("data:")
+      ) {
+        await deleteCloudinaryAssetByUrl(currentUser.image);
+      }
     }
 
     res.status(201).json({
@@ -232,6 +258,20 @@ const bookAppointment = async (req, res) => {
       });
     }
 
+    const duplicateDoctorAppointment = await appointmentModel.findOne({
+      docId,
+      slotDate,
+      slotTime,
+      cancelled: { $ne: true },
+    });
+
+    if (duplicateDoctorAppointment) {
+      return res.status(400).json({
+        success: false,
+        message: "This slot is already booked",
+      });
+    }
+
     const { slots_booked: _, ...docDataWithoutSlots } = docData.toObject();
 
     const appointment = {
@@ -252,16 +292,29 @@ const bookAppointment = async (req, res) => {
     };
 
     const newAppointment = new appointmentModel(appointment);
-    await newAppointment.save();
 
-    const updatedSlotsBooked = {
-      ...slotsBooked,
-      [slotDate]: [...bookedSlotsForDate, slotTime],
-    };
+    try {
+      await newAppointment.save();
+    } catch (error) {
+      if (error?.code === 11000) {
+        return res.status(409).json({
+          success: false,
+          message: "This slot is already booked",
+        });
+      }
+      throw error;
+    }
 
-    await doctorModel.findByIdAndUpdate(docId, {
-      slots_booked: updatedSlotsBooked,
-    });
+    try {
+      await doctorModel.findByIdAndUpdate(docId, {
+        $addToSet: {
+          [`slots_booked.${slotDate}`]: slotTime,
+        },
+      });
+    } catch (updateError) {
+      await appointmentModel.findByIdAndDelete(newAppointment._id);
+      throw updateError;
+    }
 
     return res.status(201).json({
       success: true,
@@ -346,15 +399,11 @@ const cancelAppointment = async (req, res) => {
     await appointment.save();
 
     const { docId, slotTime, slotDate } = appointment;
-    const doctorData = await doctorModel.findById(docId);
-    let slots_booked = doctorData.slots_booked;
-
-    slots_booked[slotDate] = slots_booked[slotDate].filter(
-      (e) => e !== slotTime,
-    );
 
     await doctorModel.findByIdAndUpdate(docId, {
-      slots_booked,
+      $pull: {
+        [`slots_booked.${slotDate}`]: slotTime,
+      },
     });
 
     return res.status(200).json({
@@ -457,6 +506,7 @@ const verifyRazorpay = async (req, res) => {
 export {
   registerUser,
   loginUser,
+  logoutUser,
   getProfile,
   updateProfile,
   bookAppointment,

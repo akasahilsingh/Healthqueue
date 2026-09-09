@@ -47,6 +47,22 @@ const appointmentSchema = new Schema({
   },
 });
 
-const appointmentModel =  mongoose.models.appointmentModel || mongoose.model("appointmentModel", appointmentSchema);
+// Indexes for common query patterns
+appointmentSchema.index({ userId: 1, date: -1 }); // listAppointment: find by userId, sort by date
+appointmentSchema.index({ docId: 1 });             // admin/doctor views by doctor
+
+// Enforce a single non-cancelled booking for the same doctor/date/time slot.
+appointmentSchema.index(
+  { docId: 1, slotDate: 1, slotTime: 1 },
+  { unique: true, partialFilterExpression: { cancelled: false } },
+);
+
+// Enforce a single non-cancelled booking per user for the same date/time.
+appointmentSchema.index(
+  { userId: 1, slotDate: 1, slotTime: 1 },
+  { unique: true, partialFilterExpression: { cancelled: false } },
+);
+
+const appointmentModel = mongoose.models.appointmentModel || mongoose.model("appointmentModel", appointmentSchema);
 
 export default appointmentModel

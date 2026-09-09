@@ -6,8 +6,10 @@ import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getErrorMessage } from "../utils/errorMessage";
+
 const Login = () => {
-  const { backendUrl, token, setToken } = useContext(AppContext);
+  const { backendUrl, token, setToken, loadUserProfileData } =
+    useContext(AppContext);
   const navigate = useNavigate();
   const [state, setState] = useState("Sign Up");
   const [name, setName] = useState("");
@@ -17,29 +19,29 @@ const Login = () => {
   const onSumbitHandler = async (event) => {
     event.preventDefault();
     try {
-      if (state === "Sign Up") {
-        const { data } = await axios.post(backendUrl + "/api/user/register", {
-          name,
-          password,
-          email,
-        });
-        if (data.success) {
-          localStorage.setItem("token", data.token);
-          setToken(data.token);
-        } else {
-          toast.error(data.message);
+      const requestUrl =
+        state === "Sign Up"
+          ? backendUrl + "/api/user/register"
+          : backendUrl + "/api/user/login";
+
+      const { data } = await axios.post(
+        requestUrl,
+        state === "Sign Up"
+          ? { name, password, email }
+          : { password, email },
+        { withCredentials: true },
+      );
+
+      if (data.success) {
+        setToken("");
+        try {
+          await loadUserProfileData();
+        } catch {
+          // profile is fetched from the cookie auth session created by the server
         }
+        navigate("/");
       } else {
-        const { data } = await axios.post(backendUrl + "/api/user/login", {
-          password,
-          email,
-        });
-        if (data.success) {
-          localStorage.setItem("token", data.token);
-          setToken(data.token);
-        } else {
-          toast.error(data.message);
-        }
+        toast.error(data.message);
       }
     } catch (error) {
       toast.error(getErrorMessage(error, backendUrl));

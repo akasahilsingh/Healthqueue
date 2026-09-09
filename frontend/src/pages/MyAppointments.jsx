@@ -26,7 +26,7 @@ const loadRazorpay = () => {
 };
 
 const MyAppointments = () => {
-  const { backendUrl, token, getDoctorsData } = useContext(AppContext);
+  const { backendUrl, userData, getDoctorsData } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [page, setPage] = useState(1);
@@ -65,7 +65,7 @@ const MyAppointments = () => {
       try {
         const { data } = await axios.get(
           `${backendUrl}/api/user/appointments?page=${nextPage}&limit=${nextLimit}`,
-          { headers: { token } },
+          { withCredentials: true },
         );
         if (data.success) {
           const fetchedAppointments = Array.isArray(data.appointments)
@@ -80,7 +80,7 @@ const MyAppointments = () => {
         toast.error(getErrorMessage(error, backendUrl));
       }
     },
-    [backendUrl, token, page, limit],
+    [backendUrl, page, limit],
   );
 
   const cancelAppointment = async (appointmentId) => {
@@ -88,7 +88,7 @@ const MyAppointments = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/cancel-appointment",
         { appointmentId },
-        { headers: { token } },
+        { withCredentials: true },
       );
       if (data.success) {
         toast.success(data.message);
@@ -130,7 +130,7 @@ const MyAppointments = () => {
           const { data } = await axios.post(
             `${backendUrl}/api/user/verify-razorpay`,
             response,
-            { headers: { token } },
+            { withCredentials: true },
           );
           if (data.success) {
             toast.success(data.message);
@@ -165,7 +165,7 @@ const MyAppointments = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/payment-razorpay",
         { appointmentId },
-        { headers: { token } },
+        { withCredentials: true },
       );
       if (data.success) {
         initPay(data.order, data.keyId);
@@ -178,10 +178,10 @@ const MyAppointments = () => {
   };
 
   useEffect(() => {
-    if (token) {
+    if (userData) {
       getUserAppointment(page, limit);
     }
-  }, [token, page, limit, getUserAppointment]);
+  }, [userData, page, limit, getUserAppointment]);
 
   return (
     <div>

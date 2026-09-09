@@ -2,18 +2,28 @@ import React, { useState } from "react";
 import { assets } from "../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useContext } from "react";
+import axios from "axios";
 import { AppContext } from "../context/AppContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
 
-  const { token, setToken, userData } = useContext(AppContext);
+  const { backendUrl, userData, setUserData } = useContext(AppContext);
   const [showMenu, setShowMenu] = useState();
 
-  const logOut = () => {
-    setToken("");
-    localStorage.removeItem("token");
-    navigate("/");
+  const logOut = async () => {
+    try {
+      await axios.post(
+        backendUrl + "/api/user/logout",
+        {},
+        { withCredentials: true },
+      );
+    } catch {
+      // Ignore logout network failures and still clear local UI state.
+    } finally {
+      setUserData(false);
+      navigate("/");
+    }
   };
 
   return (
@@ -43,7 +53,7 @@ const Navbar = () => {
         </NavLink>
       </ul>
       <div className="flex items-center gap-4">
-        {token && userData ? (
+        {userData ? (
           <div className="flex items-center gap-2 cursor-pointer group relative">
             <img
               className="w-8 rounded-full"

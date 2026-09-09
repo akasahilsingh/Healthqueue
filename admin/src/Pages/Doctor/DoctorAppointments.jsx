@@ -7,7 +7,7 @@ import { assets } from "../../assets/assets.js";
 
 const DoctorAppointments = () => {
   const {
-    dtoken,
+    profileData,
     appointments,
     getAppointments,
     completeAppointment,
@@ -15,10 +15,10 @@ const DoctorAppointments = () => {
   } = useContext(DoctorContext);
   const { calculateAge, slotsDateFormat, currency } = useContext(AppContext);
   useEffect(() => {
-    if (dtoken) {
+    if (profileData) {
       getAppointments();
     }
-  }, [dtoken]);
+  }, [profileData]);
   return (
     <div className="w-full max-w-6xl m-5">
       <p className="mb-3 text-lg font-medium">All Appointments</p>

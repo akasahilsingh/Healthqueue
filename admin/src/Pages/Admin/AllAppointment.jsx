@@ -6,15 +6,15 @@ import { AppContext } from "../../Context/AppContext";
 import { assets } from "../../assets/assets";
 
 const AllAppointment = () => {
-  const { atoken, appointments, getAllAppointments, cancelAppointment } =
+  const { adminData, appointments, getAllAppointments, cancelAppointment } =
     useContext(AdminContext);
   const { calculateAge, slotsDateFormat, currency } = useContext(AppContext);
 
   useEffect(() => {
-    if (atoken) {
+    if (adminData) {
       getAllAppointments();
     }
-  }, [atoken]);
+  }, [adminData]);
   return (
     <div className="w-full max-w-6xl m-5">
       <p className="mb-3 text-lg font-medium">All Appointments</p>

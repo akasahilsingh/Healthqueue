@@ -10,34 +10,34 @@ const Login = () => {
   const [state, setState] = useState("Admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setAtoken, backendUrl } = useContext(AdminContext);
-  const { setdToken } = useContext(DoctorContext);
+  const { backendUrl, loadAdminProfileData, setAdminData } = useContext(AdminContext);
+  const { getProfileData, setProfileData } = useContext(DoctorContext);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
 
     try {
       if (state === "Admin") {
-        const { data } = await axios.post(`${backendUrl}/api/admin/login`, {
-          email,
-          password,
-        });
+        const { data } = await axios.post(
+          `${backendUrl}/api/admin/login`,
+          { email, password },
+          { withCredentials: true },
+        );
         if (data.success) {
-          console.log(data.token);
-          localStorage.setItem("atoken", data.token);
-          setAtoken(data.token);
+          await loadAdminProfileData();
+          setAdminData(true);
         } else {
           toast.error(data.message);
         }
       } else {
-        const { data } = await axios.post(`${backendUrl}/api/doctor/login`, {
-          email,
-          password,
-        });
+        const { data } = await axios.post(
+          `${backendUrl}/api/doctor/login`,
+          { email, password },
+          { withCredentials: true },
+        );
         if (data.success) {
-          localStorage.setItem("dtoken", data.token);
-          setdToken(data.token);
-          console.log(data.token)
+          await getProfileData();
+          setProfileData(true);
         } else {
           toast.error(data.message);
         }

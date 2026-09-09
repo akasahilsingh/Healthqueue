@@ -8,6 +8,7 @@ import {
   doctorList,
   doctorProfile,
   logInDoctor,
+  logoutDoctor,
   updateDoctorProfile,
 } from "../controllers/doctorController.js";
 import authDoctor from "../middlewares/authDoctor.js";
@@ -21,6 +22,7 @@ const doctorRouter = express.Router();
 // }, addDoctor)
 doctorRouter.get("/list", doctorList);
 doctorRouter.post("/login", logInDoctor);
+doctorRouter.post("/logout", authDoctor, logoutDoctor);
 doctorRouter.get("/appointment", authDoctor, appointmentsDoctor);
 doctorRouter.post("/complete-appointment", authDoctor, appointmentComplete);
 doctorRouter.post("/cancel-appointment", authDoctor, appointmentCancel);

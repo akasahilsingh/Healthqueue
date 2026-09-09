@@ -14,42 +14,24 @@ import DoctorDashboard from "./Pages/Doctor/DoctorDashboard.jsx";
 import DoctorAppointments from "./Pages/Doctor/DoctorAppointments.jsx";
 import DoctorProfile from "./Pages/Doctor/DoctorProfile.jsx";
 
-// const App = () => {
-//   const { atoken } = useContext(AdminContext);
-//   return atoken ? (
-//     <div className="bg-[#f8f9fd]">
-//       <ToastContainer />
-//       <Navbar />
-//       <div className="flex items-start">
-//         <Sidebar />
-//         <Routes>
-//           <Route path="/" element={<></>} />
-//           <Route path="/admin-dashboard" element={<Dashboard />} />
-//           <Route path="/all-appointments" element={<AllAppointment />} />
-//           <Route path="/add-doctor" element={<AddDoctor />} />
-//           <Route path="/doctor-list" element={<DoctorsList />} />
-//         </Routes>
-//         </div>
-//     </div>
-//   ) : (
-//     <>
-//       <Login />
-//       <ToastContainer />
-//     </>
-//   );
-// };
-
-// export default App;
-
-//temp
 
 const App = () => {
-  const { atoken } = useContext(AdminContext);
-  const { dtoken } = useContext(DoctorContext);
-  return atoken || dtoken ? (
+  const { adminData, isLoading: adminLoading } = useContext(AdminContext);
+  const { profileData, isLoading: doctorLoading } = useContext(DoctorContext);
+  const isLoading = adminLoading || doctorLoading;
+
+  return adminData || profileData ? (
     <div className="bg-[#f8f9fd]">
       <ToastContainer />
       <Navbar />
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[1px]">
+          <div className="flex items-center gap-3 rounded-full bg-white px-5 py-3 shadow-lg">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span className="text-sm font-semibold text-gray-700">Loading...</span>
+          </div>
+        </div>
+      )}
       <div className="flex items-start">
         <Sidebar />
         <Routes>

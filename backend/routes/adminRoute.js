@@ -2,6 +2,8 @@ import express from "express";
 import {
   addDoctor,
   loginAdmin,
+  logoutAdmin,
+  getAdminProfile,
   getAllDoctor,
   appointmentAdmin,
   appointmentCancel,
@@ -15,6 +17,8 @@ const adminRouter = express.Router();
 
 adminRouter.post("/add-doctor", authAdmin, upload.single("image"), addDoctor);
 adminRouter.post("/login", loginAdmin);
+adminRouter.post("/logout", logoutAdmin);
+adminRouter.get("/profile", authAdmin, getAdminProfile);
 adminRouter.post("/all-doctor", authAdmin, getAllDoctor);
 adminRouter.post("/change-availibility", authAdmin, changeAvailability);
 adminRouter.get("/appointments", authAdmin, appointmentAdmin);

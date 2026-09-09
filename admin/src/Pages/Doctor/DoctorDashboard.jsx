@@ -7,7 +7,7 @@ import { AppContext } from "../../Context/AppContext";
 
 const DoctorDashboard = () => {
   const {
-    dtoken,
+    profileData,
     dashData,
     setDashData,
     getDashData,
@@ -17,10 +17,10 @@ const DoctorDashboard = () => {
   const { currency, slotsDateFormat } = useContext(AppContext);
 
   useEffect(() => {
-    if (dtoken) {
+    if (profileData) {
       getDashData();
     }
-  }, [dtoken]);
+  }, [profileData]);
   return (
     dashData && (
       <div className="m-5">
