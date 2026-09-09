@@ -5,8 +5,8 @@ const connectDB = async () => {
     console.log("You Are Connected to MongoDB");
   });
   await mongoose.connect(`${process.env.MONGODB_URI}/healthqueue`, {
-    maxPoolSize: 50,       // match max concurrent VUs/requests
-    maxIdleTimeMS: 30000,  // close idle connections after 30s
+    maxPoolSize: 50,
+    maxIdleTimeMS: 30000,
   });
 };
 

@@ -8,8 +8,13 @@ import { useNavigate } from "react-router-dom";
 import { getErrorMessage } from "../utils/errorMessage";
 
 const Login = () => {
-  const { backendUrl, token, setToken, loadUserProfileData } =
-    useContext(AppContext);
+  const {
+    backendUrl,
+    token,
+    setToken,
+    loadUserProfileData,
+    setUserData,
+  } = useContext(AppContext);
   const navigate = useNavigate();
   const [state, setState] = useState("Sign Up");
   const [name, setName] = useState("");
@@ -34,10 +39,14 @@ const Login = () => {
 
       if (data.success) {
         setToken("");
-        try {
-          await loadUserProfileData();
-        } catch {
-          // profile is fetched from the cookie auth session created by the server
+        if (data.user) {
+          setUserData(data.user);
+        } else {
+          try {
+            await loadUserProfileData();
+          } catch {
+            // profile is fetched from the cookie auth session created by the server
+          }
         }
         navigate("/");
       } else {

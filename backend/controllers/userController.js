@@ -48,8 +48,20 @@ const registerUser = async (req, res) => {
 
     setAuthCookies(res, { id: user._id, role: "user", email: user.email });
 
+    const safeUser = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      phone: user.phone,
+      address: user.address,
+      dob: user.dob,
+      gender: user.gender,
+    };
+
     res.status(200).json({
       success: true,
+      user: safeUser,
       message: "User registered successfully",
     });
   } catch (error) {
@@ -93,8 +105,20 @@ const loginUser = async (req, res) => {
 
     setAuthCookies(res, { id: userExists._id, role: "user", email: userExists.email });
 
+    const safeUser = {
+      _id: userExists._id,
+      name: userExists.name,
+      email: userExists.email,
+      image: userExists.image,
+      phone: userExists.phone,
+      address: userExists.address,
+      dob: userExists.dob,
+      gender: userExists.gender,
+    };
+
     return res.status(200).json({
       success: true,
+      user: safeUser,
       message: "Logged In successfully",
     });
   } catch (error) {
