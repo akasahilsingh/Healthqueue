@@ -6,10 +6,13 @@ export const REFRESH_TOKEN_COOKIE = "refreshToken";
 export const ACCESS_TOKEN_TTL = "15m";
 export const REFRESH_TOKEN_TTL = "7d";
 
+const isProductionLike =
+  process.env.NODE_ENV === "production" || Boolean(process.env.RENDER);
+
 const cookieBase = {
   httpOnly: true,
-  sameSite: "Lax",
-  secure: process.env.NODE_ENV === "production",
+  sameSite: isProductionLike ? "None" : "Lax",
+  secure: isProductionLike,
   path: "/",
 };
 
