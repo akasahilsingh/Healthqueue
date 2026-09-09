@@ -301,6 +301,7 @@ export {
   changeAvailability,
   doctorList,
   logInDoctor,
+  logoutDoctor,
   appointmentsDoctor,
   appointmentComplete,
   appointmentCancel,
