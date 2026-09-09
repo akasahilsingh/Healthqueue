@@ -8,7 +8,7 @@ import { AppContext } from "../context/AppContext";
 const Navbar = () => {
   const navigate = useNavigate();
 
-  const { backendUrl, userData, setUserData } = useContext(AppContext);
+  const { backendUrl, userData, setUserData, authInitializing } = useContext(AppContext);
   const [showMenu, setShowMenu] = useState();
 
   const logOut = async () => {
@@ -53,7 +53,10 @@ const Navbar = () => {
         </NavLink>
       </ul>
       <div className="flex items-center gap-4">
-        {userData ? (
+        {authInitializing ? (
+          // Placeholder keeps layout stable while auth state is being determined
+          <div className="w-32 h-10 hidden md:block" />
+        ) : userData ? (
           <div className="flex items-center gap-2 cursor-pointer group relative">
             <img
               className="w-8 rounded-full"

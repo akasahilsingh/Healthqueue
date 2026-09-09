@@ -15,6 +15,8 @@ const AppContextProvider = (prop) => {
   const [token, setToken] = useState("");
   const [userData, setUserData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // True until the first auth check completes — prevents flash of logged-out UI on reload
+  const [authInitializing, setAuthInitializing] = useState(true);
   let pendingApiCalls = 0;
 
   // Ref so the single-registered interceptor always calls the latest setUserData
@@ -113,6 +115,8 @@ const AppContextProvider = (prop) => {
       }
     } catch {
       setUserData(false);
+    } finally {
+      setAuthInitializing(false);
     }
   };
 
@@ -127,6 +131,7 @@ const AppContextProvider = (prop) => {
     setUserData,
     loadUserProfileData,
     isLoading,
+    authInitializing,
   };
 
   useEffect(() => {
