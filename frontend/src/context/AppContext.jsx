@@ -97,7 +97,6 @@ const AppContextProvider = (prop) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error.message);
       toast.error(getErrorMessage(error, backendUrl));
     }
   };

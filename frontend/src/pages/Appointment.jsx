@@ -136,11 +136,6 @@ const Appointment = () => {
   useEffect(() => {
     getAvailableSlots();
   }, [docInfo]);
-  useEffect(() => {
-    console.log(docSlots);
-  }, [docSlots]);
-
-  // console.log(currentDate);
 
   return (
     docInfo && (
