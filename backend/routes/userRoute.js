@@ -11,7 +11,7 @@ import {
   updateProfile,
   verifyRazorpay,
 } from "../controllers/userController.js";
-import authUser from "../middlewares/authUser.js";
+import authUser, { optionalAuthUser } from "../middlewares/authUser.js";
 import upload from "../middlewares/multer.js";
 import createRateLimiter from "../middlewares/rateLimiter.js";
 
@@ -39,7 +39,7 @@ const bookAppointmentLimiter = createRateLimiter({
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/logout", logoutUser);
-userRouter.get("/get-profile", authUser, getProfile);
+userRouter.get("/get-profile", optionalAuthUser, getProfile);
 userRouter.post(
   "/update-profile",
   authUser,

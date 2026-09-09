@@ -22,4 +22,24 @@ const authUser = async (req, res, next) => {
   }
 };
 
+const optionalAuthUser = async (req, res, next) => {
+  try {
+    const cookies = parseCookies(req.headers.cookie || "");
+    const token = cookies[ACCESS_TOKEN_COOKIE];
+
+    if (!token) {
+      req.user = null;
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    return next();
+  } catch (error) {
+    req.user = null;
+    return next();
+  }
+};
+
+export { optionalAuthUser };
 export default authUser;
