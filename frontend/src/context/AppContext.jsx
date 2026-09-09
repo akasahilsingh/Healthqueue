@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/errorMessage";
@@ -17,6 +17,12 @@ const AppContextProvider = (prop) => {
   const [isLoading, setIsLoading] = useState(false);
   let pendingApiCalls = 0;
 
+  // Ref so the single-registered interceptor always calls the latest setUserData
+  const setUserDataRef = useRef(setUserData);
+  useEffect(() => {
+    setUserDataRef.current = setUserData;
+  });
+
   axios.interceptors = axios.interceptors || { request: [], response: [] };
   if (!axios.__healthqueueLoaderInstalled) {
     axios.interceptors.request.use((config) => {
@@ -34,12 +40,40 @@ const AppContextProvider = (prop) => {
         }
         return response;
       },
-      (error) => {
+      async (error) => {
         pendingApiCalls -= 1;
         if (pendingApiCalls <= 0) {
           setIsLoading(false);
           pendingApiCalls = 0;
         }
+
+        const originalRequest = error.config;
+
+        // If we get a 401 and haven't already retried, attempt a silent token refresh
+        if (
+          error.response?.status === 401 &&
+          !originalRequest._retry &&
+          // Don't try to refresh if the failing request IS the refresh endpoint (avoid loops)
+          !originalRequest.url?.includes("/refresh-token") &&
+          !originalRequest.url?.includes("/login") &&
+          !originalRequest.url?.includes("/register")
+        ) {
+          originalRequest._retry = true;
+          try {
+            // Ask the server to issue a new access token using the refresh-token cookie
+            await axios.post(
+              backendUrl + "/api/user/refresh-token",
+              {},
+              { withCredentials: true },
+            );
+            // Retry the original request now that we have a fresh access token
+            return axios(originalRequest);
+          } catch {
+            // Refresh token is also expired — force the user to re-login
+            setUserDataRef.current(false);
+          }
+        }
+
         return Promise.reject(error);
       },
     );

@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import vaildator from "validator";
 import bcrypt from "bcrypt";
 import userModel from "../models/userModel.js";
@@ -8,7 +9,15 @@ import {
   uploadTempFileToCloudinary,
   deleteCloudinaryAssetByUrl,
 } from "../config/cloudinary.js";
-import { setAuthCookies, clearAuthCookies } from "../config/jwt.js";
+import {
+  setAuthCookies,
+  clearAuthCookies,
+  signAccessToken,
+  accessCookieOptions,
+  parseCookies,
+  REFRESH_TOKEN_COOKIE,
+  ACCESS_TOKEN_COOKIE,
+} from "../config/jwt.js";
 
 const registerUser = async (req, res) => {
   try {
@@ -530,6 +539,49 @@ const verifyRazorpay = async (req, res) => {
   }
 };
 
+const refreshToken = async (req, res) => {
+  try {
+    const cookies = parseCookies(req.headers.cookie || "");
+    const token = cookies[REFRESH_TOKEN_COOKIE];
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "No refresh token. Please log in again.",
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token expired or invalid. Please log in again.",
+      });
+    }
+
+    if (decoded.type !== "refresh") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token type.",
+      });
+    }
+
+    // Issue a new access token
+    const newAccessToken = signAccessToken({
+      id: decoded.id,
+      role: decoded.role,
+      email: decoded.email,
+    });
+    res.cookie(ACCESS_TOKEN_COOKIE, newAccessToken, accessCookieOptions);
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export {
   registerUser,
   loginUser,
@@ -541,4 +593,5 @@ export {
   cancelAppointment,
   paymentRazorPay,
   verifyRazorpay,
+  refreshToken,
 };

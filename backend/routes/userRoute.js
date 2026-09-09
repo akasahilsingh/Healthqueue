@@ -10,6 +10,7 @@ import {
   registerUser,
   updateProfile,
   verifyRazorpay,
+  refreshToken,
 } from "../controllers/userController.js";
 import authUser, { optionalAuthUser } from "../middlewares/authUser.js";
 import upload from "../middlewares/multer.js";
@@ -39,6 +40,7 @@ const bookAppointmentLimiter = createRateLimiter({
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/logout", logoutUser);
+userRouter.post("/refresh-token", refreshToken);
 userRouter.get("/get-profile", optionalAuthUser, getProfile);
 userRouter.post(
   "/update-profile",
