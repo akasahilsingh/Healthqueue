@@ -9,9 +9,7 @@ const AppContextProvider = (prop) => {
   const currencySymbol = "₹";
   const backendUrl =
     import.meta.env.VITE_BACKEND_URL ||
-    (import.meta.env.DEV
-      ? "http://localhost:4000"
-      : "https://healthqueue-knpw.onrender.com");
+    (import.meta.env.DEV ? "http://localhost:4000" : "");
 
   const [doctors, setDoctors] = useState([]);
   const [token, setToken] = useState("");
@@ -79,7 +77,7 @@ const AppContextProvider = (prop) => {
       } else {
         setUserData(false);
       }
-    } catch (error) {
+    } catch {
       setUserData(false);
     }
   };

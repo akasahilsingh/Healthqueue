@@ -227,7 +227,12 @@ const Appointment = () => {
           </div>
           <button
             onClick={bookAppointment}
-            disabled={!docInfo.availability || !docSlots[slotIndex]?.length || !slotTime}
+            disabled={
+              !userData ||
+              !docInfo.availability ||
+              !docSlots[slotIndex]?.length ||
+              !slotTime
+            }
             className="bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Book an Appointment
