@@ -8,6 +8,10 @@ const redis = redisUrl
   : null;
 
 if (redis) {
+  redis.on("ready", () => {
+    console.log("Redis connected successfully");
+  });
+
   redis.on("error", (error) => {
     console.error("Redis error", error.message);
   });
