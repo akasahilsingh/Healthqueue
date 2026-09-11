@@ -16,9 +16,26 @@ import DoctorProfile from "./Pages/Doctor/DoctorProfile.jsx";
 
 
 const App = () => {
-  const { adminData, isLoading: adminLoading } = useContext(AdminContext);
-  const { profileData, isLoading: doctorLoading } = useContext(DoctorContext);
+  const {
+    adminData,
+    authInitializing: adminAuthInitializing,
+    isLoading: adminLoading,
+  } = useContext(AdminContext);
+  const {
+    profileData,
+    authInitializing: doctorAuthInitializing,
+    isLoading: doctorLoading,
+  } = useContext(DoctorContext);
   const isLoading = adminLoading || doctorLoading;
+  const authInitializing = adminAuthInitializing || doctorAuthInitializing;
+
+  if (authInitializing) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-gray-600">
+        Checking session...
+      </div>
+    );
+  }
 
   return adminData || profileData ? (
     <div className="bg-[#f8f9fd]">

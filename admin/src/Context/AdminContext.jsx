@@ -8,6 +8,7 @@ export const AdminContext = createContext();
 const AdminContextProvider = (props) => {
   const [adminData, setAdminData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [authInitializing, setAuthInitializing] = useState(true);
   let pendingApiCalls = 0;
 
   if (!axios.__healthqueueAdminLoaderInstalled) {
@@ -61,6 +62,8 @@ const AdminContextProvider = (props) => {
       }
     } catch (error) {
       setAdminData(false);
+    } finally {
+      setAuthInitializing(false);
     }
   };
 
@@ -169,6 +172,7 @@ const AdminContextProvider = (props) => {
     dashData,
     getDashData,
     loadAdminProfileData,
+    authInitializing,
     isLoading,
   };
 

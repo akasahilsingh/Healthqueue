@@ -14,6 +14,7 @@ export const DoctorContext = createContext();
 const DoctorContextProvider = (props) => {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  const [authInitializing, setAuthInitializing] = useState(true);
   let pendingApiCalls = 0;
 
   if (!axios.__healthqueueDoctorLoaderInstalled) {
@@ -136,6 +137,8 @@ const DoctorContextProvider = (props) => {
       }
     } catch (error) {
       setProfileData(false);
+    } finally {
+      setAuthInitializing(false);
     }
   }, [backendUrl]);
 
@@ -152,6 +155,7 @@ const DoctorContextProvider = (props) => {
     profileData,
     setProfileData,
     getProfileData,
+    authInitializing,
     isLoading,
   };
 
@@ -164,6 +168,8 @@ const DoctorContextProvider = (props) => {
 
     if (isDoctorRoute) {
       getProfileData();
+    } else {
+      setAuthInitializing(false);
     }
   }, [getProfileData, location.pathname]);
 
