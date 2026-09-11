@@ -4,7 +4,7 @@ import { AppContext } from "../context/AppContext.jsx";
 
 const Doctors = () => {
   const { speciality } = useParams();
-  const { doctors } = useContext(AppContext);
+  const { doctors, getDoctorsData } = useContext(AppContext);
   const [filterDoc, setFilterDoc] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const navigate = useNavigate();
@@ -21,6 +21,12 @@ const Doctors = () => {
   useEffect(() => {
     applyFilter();
   }, [speciality, doctors]);
+
+  useEffect(() => {
+    if (doctors.length === 0) {
+      getDoctorsData();
+    }
+  }, []);
 
   return (
     <div>

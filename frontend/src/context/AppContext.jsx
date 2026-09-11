@@ -134,10 +134,6 @@ const AppContextProvider = (prop) => {
   };
 
   useEffect(() => {
-    getDoctorsData();
-  }, []);
-
-  useEffect(() => {
     loadUserProfileData();
   }, []);
 

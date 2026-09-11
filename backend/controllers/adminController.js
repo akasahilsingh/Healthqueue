@@ -37,17 +37,23 @@ const addDoctor = async (req, res) => {
       !address ||
       !imageFile
     ) {
-      return res.json({ success: false, message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
     // Validating email format
     if (!validator.isEmail(email)) {
-      return res.json({ success: false, message: "Invalid email format" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
     }
 
     // Validating Strong Password
     if (password.length < 8) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "Password must be at least 8 characters long",
       });
@@ -75,10 +81,16 @@ const addDoctor = async (req, res) => {
     };
     const newDoctor = new doctorModel(doctorData);
     await newDoctor.save();
-    return res.json({ success: true, message: "Doctor added successfully" });
+    return res.status(201).json({
+      success: true,
+      message: "Doctor added successfully",
+    });
   } catch (error) {
     console.log(error);
-    return res.json({ success: false, message: "Something went wrong" });
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
   }
 };
 
@@ -95,13 +107,16 @@ const loginAdmin = async (req, res) => {
         email: process.env.ADMIN_EMAIL,
         role: "admin",
       });
-      res.json({ success: true, message: "Login successful" });
+      res.status(200).json({ success: true, message: "Login successful" });
     } else {
-      res.json({ success: false, message: "Invalid credentials" });
+      res.status(401).json({ success: false, message: "Invalid credentials" });
     }
   } catch (error) {
     console.log(error);
-    return res.json({ success: false, message: "Something went wrong" });
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
   }
 };
 
@@ -149,6 +164,10 @@ const getAllDoctor = async (req, res) => {
     });
   } catch (error) {
     console.log("Error while getting all doctors", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to fetch doctors",
+    });
   }
 };
 

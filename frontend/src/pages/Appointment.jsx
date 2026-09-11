@@ -130,6 +130,9 @@ const Appointment = () => {
   };
 
   useEffect(() => {
+    if (doctors.length === 0) {
+      getDoctorsData();
+    }
     fetchDocInfo();
   }, [doctors, docId]);
 

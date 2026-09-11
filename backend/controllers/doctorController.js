@@ -84,7 +84,7 @@ const doctorList = async (req, res) => {
 
     return res.status(200).json(payload);
   } catch (error) {
-    return res.status(400).json({
+    return res.status(500).json({
       success: false,
       message: error.message || "Not able to fetch doctors",
     });
@@ -98,13 +98,13 @@ const logInDoctor = async (req, res) => {
     const doctor = await doctorModel.findOne({ email });
     if (!doctor) {
       return res
-        .status(404)
+        .status(401)
         .json({ success: false, message: "Invalid credentials" });
     }
     const isMatch = await bcrypt.compare(password, doctor.password);
     if (!isMatch) {
       return res
-        .status(404)
+        .status(401)
         .json({ success: false, message: "Invalid credentials" });
     }
 
@@ -162,7 +162,7 @@ const appointmentComplete = async (req, res) => {
         message: "Successfully marked appointment completed",
       });
     } else {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "Mark failed",
       });
@@ -203,7 +203,7 @@ const appointmentCancel = async (req, res) => {
         message: "Successfully marked appointment cancelled",
       });
     } else {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "Cancellation failed",
       });
@@ -308,7 +308,7 @@ const updateDoctorProfile = async (req, res) => {
       availability,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Doctor profile updated successfully",
     });

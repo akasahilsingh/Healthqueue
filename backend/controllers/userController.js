@@ -68,7 +68,7 @@ const registerUser = async (req, res) => {
       gender: user.gender,
     };
 
-    res.status(200).json({
+    return res.status(201).json({
       success: true,
       user: safeUser,
       message: "User registered successfully",
@@ -106,7 +106,7 @@ const loginUser = async (req, res) => {
     );
 
     if (!isPasswordCorrect) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Wrong credentials",
       });
@@ -158,7 +158,7 @@ const getProfile = async (req, res) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(200).json({
+      return res.status(401).json({
         success: false,
         user: null,
         message: "No active user session",
@@ -224,7 +224,7 @@ const updateProfile = async (req, res) => {
       }
     }
 
-    res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Profile updated successfuly",
     });
@@ -417,15 +417,22 @@ const cancelAppointment = async (req, res) => {
     const userId = req.user?.id;
     const { appointmentId } = req.body;
     if (!userId) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "User not found",
       });
     }
 
     const appointment = await appointmentModel.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
     if (appointment.userId !== userId) {
-      return res.status(400).json({
+      return res.status(403).json({
         success: false,
         message: "Unauthorized to cancel appointment",
       });
@@ -473,7 +480,7 @@ const paymentRazorPay = async (req, res) => {
     const appointmentData = await appointmentModel.findById(appointmentId);
 
     if (!appointmentData || appointmentData.cancelled) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "Appointment cancelled or not found",
       });
@@ -521,12 +528,12 @@ const verifyRazorpay = async (req, res) => {
       await appointmentModel.findByIdAndUpdate(orderInfo.receipt, {
         payment: true,
       });
-      res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: "Payment successful",
       });
     } else {
-      res.status(500).json({
+      return res.status(402).json({
         success: false,
         message: "Payment failed",
       });
