@@ -14,6 +14,13 @@ const authDoctor = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== "doctor" || !decoded.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Doctor access required",
+      });
+    }
+
     req.user = decoded.id;
     next();
   } catch (error) {

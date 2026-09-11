@@ -1,11 +1,18 @@
 import axios from "axios";
-import { createContext, useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/errorMessage";
 
 export const DoctorContext = createContext();
 
 const DoctorContextProvider = (props) => {
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   let pendingApiCalls = 0;
 
@@ -149,8 +156,16 @@ const DoctorContextProvider = (props) => {
   };
 
   useEffect(() => {
-    getProfileData();
-  }, [getProfileData]);
+    const isDoctorRoute = [
+      "/doctor-dashboard",
+      "/doctor-appointments",
+      "/doctor-profile",
+    ].includes(location.pathname);
+
+    if (isDoctorRoute) {
+      getProfileData();
+    }
+  }, [getProfileData, location.pathname]);
 
   return (
     <DoctorContext.Provider value={value}>
