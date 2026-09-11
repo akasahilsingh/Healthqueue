@@ -258,7 +258,7 @@ const adminDashboard = async (req, res) => {
     // const users = await userModel.find({});
     // const appointments = await appointmentModel.find({});
 
-    const [doctors, users, appointmentCount, latestAppointments] =
+    const [doctorCount, userCount, appointmentCount, latestAppointments] =
       await Promise.all([
         doctorModel.countDocuments({}),
         userModel.countDocuments({}),
