@@ -6,8 +6,13 @@ import { AppContext } from "../../Context/AppContext";
 import { assets } from "../../assets/assets";
 
 const AllAppointment = () => {
-  const { adminData, appointments, getAllAppointments, cancelAppointment } =
-    useContext(AdminContext);
+  const {
+    adminData,
+    appointments,
+    appointmentsPagination,
+    getAllAppointments,
+    cancelAppointment,
+  } = useContext(AdminContext);
   const { calculateAge, slotsDateFormat, currency } = useContext(AppContext);
 
   useEffect(() => {
@@ -15,6 +20,20 @@ const AllAppointment = () => {
       getAllAppointments();
     }
   }, [adminData]);
+
+  const goToPage = (page) => {
+    if (
+      page >= 1 &&
+      page <= appointmentsPagination.totalPages &&
+      page !== appointmentsPagination.currentPage
+    ) {
+      getAllAppointments(page, appointmentsPagination.limit);
+    }
+  };
+
+  const firstItemNumber =
+    (appointmentsPagination.currentPage - 1) * appointmentsPagination.limit;
+
   return (
     <div className="w-full max-w-6xl m-5">
       <p className="mb-3 text-lg font-medium">All Appointments</p>
@@ -34,7 +53,7 @@ const AllAppointment = () => {
             className="flex flex-wrap justify-between max-sm:gap-2 sm:grid sm:grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr] items-center text-gray-500 py-3 px-6 birder-b hover:bg-gray-50"
             key={item._id}
           >
-            <p className="max-sm:hidden">{index + 1}</p>
+            <p className="max-sm:hidden">{firstItemNumber + index + 1}</p>
             <div className="flex items-center gap-2">
               <img
                 className="w-8 rounded-full"
@@ -72,6 +91,27 @@ const AllAppointment = () => {
           </div>
         ))}
       </div>
+      {appointmentsPagination.totalPages > 0 && (
+        <div className="flex items-center justify-between py-4 text-sm text-gray-600">
+          <button
+            className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={!appointmentsPagination.hasPrevPage}
+            onClick={() => goToPage(appointmentsPagination.currentPage - 1)}
+          >
+            Previous
+          </button>
+          <span>
+            Page {appointmentsPagination.currentPage} of {appointmentsPagination.totalPages}
+          </span>
+          <button
+            className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={!appointmentsPagination.hasNextPage}
+            onClick={() => goToPage(appointmentsPagination.currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

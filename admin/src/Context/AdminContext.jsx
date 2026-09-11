@@ -41,6 +41,14 @@ const AdminContextProvider = (props) => {
   }
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [appointmentsPagination, setAppointmentsPagination] = useState({
+    totalAppointments: 0,
+    limit: 10,
+    currentPage: 1,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
   const [dashData, setDashData] = useState(false);
   const backendUrl =
     import.meta.env.VITE_BACKEND_URL ||
@@ -104,15 +112,16 @@ const AdminContextProvider = (props) => {
     }
   };
 
-  const getAllAppointments = async () => {
+  const getAllAppointments = async (page = 1, limit = 10) => {
     try {
       const { data } = await axios.get(
-        backendUrl + "/api/admin/appointments",
+        `${backendUrl}/api/admin/appointments?page=${page}&limit=${limit}`,
         { withCredentials: true },
       );
 
       if (data.success) {
         setAppointments(data.appointments);
+        setAppointmentsPagination(data.pagination);
       } else {
         toast.error(data.message);
       }
@@ -130,7 +139,10 @@ const AdminContextProvider = (props) => {
       );
 
       if (data.success) {
-        getAllAppointments();
+        getAllAppointments(
+          appointmentsPagination.currentPage,
+          appointmentsPagination.limit,
+        );
         toast.success(data.message);
       } else {
         toast.error(data.message);
@@ -167,6 +179,7 @@ const AdminContextProvider = (props) => {
     changeAvailability,
     appointments,
     setAppointments,
+    appointmentsPagination,
     getAllAppointments,
     cancelAppointment,
     dashData,

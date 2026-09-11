@@ -173,10 +173,32 @@ const getAllDoctor = async (req, res) => {
 
 const appointmentAdmin = async (req, res) => {
   try {
-    const appointments = await appointmentModel.find({});
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
+    const skip = (page - 1) * limit;
+
+    const [appointments, totalAppointments] = await Promise.all([
+      appointmentModel
+        .find({})
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(limit),
+      appointmentModel.countDocuments({}),
+    ]);
+
+    const totalPages = Math.ceil(totalAppointments / limit);
+
     return res.status(200).json({
       success: true,
       appointments,
+      pagination: {
+        totalAppointments,
+        limit,
+        currentPage: page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
       message: "Appointements fetched successfully",
     });
   } catch (error) {
