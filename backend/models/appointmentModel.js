@@ -50,6 +50,7 @@ const appointmentSchema = new Schema({
 // Indexes for common query patterns
 appointmentSchema.index({ userId: 1, date: -1 }); // listAppointment: find by userId, sort by date
 appointmentSchema.index({ docId: 1 });             // admin/doctor views by doctor
+appointmentSchema.index({ date: -1 });             // dashboard: latest appointments
 
 // Enforce a single non-cancelled booking for the same doctor/date/time slot.
 appointmentSchema.index(

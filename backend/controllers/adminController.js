@@ -260,16 +260,23 @@ const adminDashboard = async (req, res) => {
 
     const [doctors, users, appointmentCount, latestAppointments] =
       await Promise.all([
-        doctorModel.find({}),
-        userModel.find({}),
-        appointmentModel.find({}).countDocuments({}),
-        appointmentModel.find({}).sort({ date: -1 }).limit(5),
+        doctorModel.countDocuments({}),
+        userModel.countDocuments({}),
+        appointmentModel.countDocuments({}),
+        appointmentModel
+          .find({})
+          .select(
+            "userData docData slotDate slotTime amount cancelled isCompleted date",
+          )
+          .sort({ date: -1 })
+          .limit(5)
+          .lean(),
       ]);
 
     const dashData = {
-      doctors: doctors.length,
+      doctors: doctorCount,
       appointments: appointmentCount,
-      patients: users.length,
+      patients: userCount,
       latestAppointments: latestAppointments,
     };
 
