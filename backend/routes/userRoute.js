@@ -38,7 +38,7 @@ const bookAppointmentLimiter = createRateLimiter({
 });
 
 userRouter.post("/register", registerUser);
-userRouter.post("/login", loginUser);
+userRouter.post("/login",loginLimiterByEmail, loginUser);
 userRouter.post("/logout", logoutUser);
 userRouter.post("/refresh-token", refreshToken);
 userRouter.get("/get-profile", optionalAuthUser, getProfile);

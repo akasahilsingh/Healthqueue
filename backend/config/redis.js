@@ -4,8 +4,11 @@ const redisUrl = process.env.REDIS_URL;
 const redis = redisUrl
   ? new Redis(redisUrl, {
       maxRetriesPerRequest: 3,
+      connectTimeout: 1000,
     })
   : null;
+
+export const isRedisReady = () => redis?.status === "ready";
 
 if (redis) {
   redis.on("ready", () => {

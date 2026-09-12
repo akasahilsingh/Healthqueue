@@ -115,7 +115,7 @@ const loginAdmin = async (req, res) => {
     console.log(error);
     return res.status(500).json({
       success: false,
-      message: "Something went wrong",
+      message: "Unable to login admin",
     });
   }
 };
@@ -134,7 +134,7 @@ const getAdminProfile = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to fetch admin profile",
     });
   }
 };
@@ -149,7 +149,7 @@ const logoutAdmin = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to logout admin",
     });
   }
 };
@@ -166,7 +166,7 @@ const getAllDoctor = async (req, res) => {
     console.log("Error while getting all doctors", error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable to fetch doctors",
+      message: "Unable to fetch doctors",
     });
   }
 };
@@ -205,7 +205,7 @@ const appointmentAdmin = async (req, res) => {
     console.log("Error while getting all doctors", error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || "Error while getting all apoitments",
+      message: "Unable to fetch appointments",
     });
   }
 };
@@ -247,7 +247,7 @@ const appointmentCancel = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable to cancel the appointment",
+      message: "Unable to cancel appointment",
     });
   }
 };
@@ -289,7 +289,7 @@ const adminDashboard = async (req, res) => {
     console.log(error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable to get dashboard details",
+      message: "Unable to fetch admin dashboard",
     });
   }
 };

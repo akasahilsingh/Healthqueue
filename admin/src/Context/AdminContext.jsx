@@ -1,11 +1,13 @@
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/errorMessage";
 
 export const AdminContext = createContext();
 
 const AdminContextProvider = (props) => {
+  const location = useLocation();
   const [adminData, setAdminData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [authInitializing, setAuthInitializing] = useState(true);
@@ -190,8 +192,19 @@ const AdminContextProvider = (props) => {
   };
 
   useEffect(() => {
-    loadAdminProfileData();
-  }, []);
+    const isAdminRoute = [
+      "/admin-dashboard",
+      "/all-appointments",
+      "/add-doctor",
+      "/doctor-list",
+    ].includes(location.pathname);
+
+    if (isAdminRoute) {
+      loadAdminProfileData();
+    } else {
+      setAuthInitializing(false);
+    }
+  }, [location.pathname]);
 
   return (
     <AdminContext.Provider value={value}>

@@ -1,7 +1,7 @@
 import doctorModel from "../models/doctorModel.js";
 import bcrypt from "bcrypt";
 import appointmentModel from "../models/appointmentModel.js";
-import redis from "../config/redis.js";
+import redis, { isRedisReady } from "../config/redis.js";
 import { setAuthCookies, clearAuthCookies } from "../config/jwt.js";
 
 const changeAvailability = async (req, res) => {
@@ -23,7 +23,7 @@ const changeAvailability = async (req, res) => {
     );
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to change doctor availability",
     });
   }
 };
@@ -41,14 +41,14 @@ const logoutDoctor = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to logout doctor",
     });
   }
 };
 
 const doctorList = async (req, res) => {
   try {
-    if (redis) {
+    if (isRedisReady()) {
       try {
         const cached = await redis.get(DOCTOR_LIST_CACHE_KEY);
         if (cached) {
@@ -70,7 +70,7 @@ const doctorList = async (req, res) => {
       message: "Successfully fetched all doctors",
     };
 
-    if (redis) {
+    if (isRedisReady()) {
       try {
         await redis.setex(
           DOCTOR_LIST_CACHE_KEY,
@@ -86,7 +86,7 @@ const doctorList = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Not able to fetch doctors",
+      message: "Unable to fetch doctors",
     });
   }
 };
@@ -118,7 +118,7 @@ const logInDoctor = async (req, res) => {
     console.log("Error while login doctor: ", error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable to login doctor",
+      message: "Unable to login doctor",
     });
   }
 };
@@ -137,7 +137,7 @@ const appointmentsDoctor = async (req, res) => {
     console.log("Error while fetching doctor appointments: ", error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable to login doctor",
+      message: "Unable to fetch doctor appointments",
     });
   }
 };
@@ -171,7 +171,7 @@ const appointmentComplete = async (req, res) => {
     console.log("Error while marking complete of appointment: ", error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable to mark complete appointment",
+      message: "Unable to complete appointment",
     });
   }
 };
@@ -212,7 +212,7 @@ const appointmentCancel = async (req, res) => {
     console.log("Error while marking complete of appointment: ", error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable to mark complete appointment",
+      message: "Unable to cancel appointment",
     });
   }
 };
@@ -257,8 +257,7 @@ const doctordashboard = async (req, res) => {
     );
     return res.status(500).json({
       success: false,
-      message:
-        error.message || "Unable to get appointment data for doctor dashboard",
+      message: "Unable to fetch doctor dashboard",
     });
   }
 };
@@ -288,9 +287,7 @@ const doctorProfile = async (req, res) => {
     );
     return res.status(500).json({
       success: false,
-      message:
-        error.message ||
-        "Unable to fetch doctor profile data for doctor dashboard",
+      message: "Unable to fetch doctor profile",
     });
   }
 };
@@ -316,7 +313,7 @@ const updateDoctorProfile = async (req, res) => {
     console.log("Error while updating doctor profile: ", error.message);
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable update doctor profile",
+      message: "Unable to update doctor profile",
     });
   }
 };

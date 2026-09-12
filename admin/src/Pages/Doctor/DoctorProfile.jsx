@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { DoctorContext } from "../../Context/Doctorcontext";
 import { AppContext } from "../../Context/AppContext";
 import axios from "axios";
@@ -36,11 +36,6 @@ const DoctorProfile = () => {
     }
   };
 
-  useEffect(() => {
-    if (profileData) {
-      getProfileData();
-    }
-  }, [profileData, getProfileData]);
   return (
     profileData && (
       <div>

@@ -1,10 +1,10 @@
-import redis from "../config/redis.js";
+import { isRedisReady } from "../config/redis.js";
 
 // Fixed-window rate limiter backed by Redis when REDIS_URL is configured.
 const createRateLimiter = ({ keyGenerator, prefix, windowSeconds, maxRequests }) => {
   return async (req, res, next) => {
     try {
-      if (!redis) {
+      if (!isRedisReady()) {
         return next();
       }
 

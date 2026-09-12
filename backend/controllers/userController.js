@@ -76,7 +76,7 @@ const registerUser = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to register user",
     });
   }
 };
@@ -133,7 +133,7 @@ const loginUser = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to login user",
     });
   }
 };
@@ -148,7 +148,7 @@ const logoutUser = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to logout user",
     });
   }
 };
@@ -182,7 +182,7 @@ const getProfile = async (req, res) => {
     return res.status(500).json({
       success: false,
       user: null,
-      message: error.message,
+      message: "Unable to fetch user profile",
     });
   }
 };
@@ -231,7 +231,7 @@ const updateProfile = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to update user profile",
     });
   }
 };
@@ -360,7 +360,7 @@ const bookAppointment = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to book appointment",
     });
   }
 };
@@ -407,7 +407,7 @@ const listAppointment = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to fetch appointments",
     });
   }
 };
@@ -457,7 +457,7 @@ const cancelAppointment = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message || "Unable to cancel the appointment",
+      message: "Unable to cancel appointment",
     });
   }
 };
@@ -511,7 +511,7 @@ const paymentRazorPay = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to create payment order",
     });
   }
 };
@@ -541,7 +541,7 @@ const verifyRazorpay = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Unable to verify payment",
     });
   }
 };
@@ -585,7 +585,10 @@ const refreshToken = async (req, res) => {
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Unable to refresh access token",
+    });
   }
 };
 
