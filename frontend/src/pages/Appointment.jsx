@@ -226,7 +226,6 @@ const Appointment = () => {
           <button
             onClick={bookAppointment}
             disabled={
-              !userData ||
               !docInfo.availability ||
               !docSlots[slotIndex]?.length ||
               !slotTime

@@ -16,7 +16,7 @@ const Login = () => {
     setUserData,
   } = useContext(AppContext);
   const navigate = useNavigate();
-  const [state, setState] = useState("Sign Up");
+  const [state, setState] = useState("Log In");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

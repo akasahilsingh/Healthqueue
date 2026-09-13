@@ -17,6 +17,7 @@ const AppContextProvider = (prop) => {
   const [isLoading, setIsLoading] = useState(false);
   // True until the first auth check completes — prevents flash of logged-out UI on reload
   const [authInitializing, setAuthInitializing] = useState(true);
+  const authCheckStarted = useRef(false);
   let pendingApiCalls = 0;
 
   // Ref so the single-registered interceptor always calls the latest setUserData
@@ -134,6 +135,11 @@ const AppContextProvider = (prop) => {
   };
 
   useEffect(() => {
+    if (authCheckStarted.current) {
+      return;
+    }
+
+    authCheckStarted.current = true;
     loadUserProfileData();
   }, []);
 
