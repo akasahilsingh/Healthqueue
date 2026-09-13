@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, index: true },
   password: { type: String, required: true },
   image: {
     type: String,
     default:
-      "https://res.cloudinary.com/dd0bxsqmo/image/upload/profile_user_avatar_people_icon_219228_hgowj6.png"
+      "https://res.cloudinary.com/dd0bxsqmo/image/upload/profile_user_avatar_people_icon_219228_hgowj6.png",
   },
   address: { type: Object, default: { line1: "", line2: "" } },
   gender: { type: String, default: "Not Selected" },

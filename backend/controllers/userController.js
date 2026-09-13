@@ -88,15 +88,15 @@ const loginUser = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password is required",
+        message: "Invalid email or password",
       });
     }
 
-    const userExists = await userModel.findOne({ email });
+    const userExists = await userModel.findOne({ email: email.toLowerCase().trim() });
     if (!userExists) {
       return res.status(404).json({
         success: false,
-        message: "Email id is not registered",
+        message: "Invalid email or password",
       });
     }
 
