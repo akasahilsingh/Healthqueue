@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { getErrorMessage } from "../utils/errorMessage";
 
 export const AppContext = createContext();
+const AUTH_SESSION_KEY = "healthqueue-authenticated";
 
 const AppContextProvider = (prop) => {
   const currencySymbol = "₹";
@@ -19,6 +20,14 @@ const AppContextProvider = (prop) => {
   const [authInitializing, setAuthInitializing] = useState(true);
   const authCheckStarted = useRef(false);
   let pendingApiCalls = 0;
+
+  const markAuthenticated = () => {
+    localStorage.setItem(AUTH_SESSION_KEY, "true");
+  };
+
+  const clearAuthenticated = () => {
+    localStorage.removeItem(AUTH_SESSION_KEY);
+  };
 
   // Ref so the single-registered interceptor always calls the latest setUserData
   const setUserDataRef = useRef(setUserData);
@@ -55,6 +64,7 @@ const AppContextProvider = (prop) => {
         // If we get a 401 and haven't already retried, attempt a silent token refresh
         if (
           error.response?.status === 401 &&
+          localStorage.getItem(AUTH_SESSION_KEY) === "true" &&
           !originalRequest._retry &&
           // Don't try to refresh if the failing request IS the refresh endpoint (avoid loops)
           !originalRequest.url?.includes("/refresh-token") &&
@@ -73,6 +83,7 @@ const AppContextProvider = (prop) => {
             return axios(originalRequest);
           } catch {
             // Refresh token is also expired — force the user to re-login
+            clearAuthenticated();
             setUserDataRef.current(false);
           }
         }
@@ -130,6 +141,8 @@ const AppContextProvider = (prop) => {
     userData,
     setUserData,
     loadUserProfileData,
+    markAuthenticated,
+    clearAuthenticated,
     isLoading,
     authInitializing,
   };
@@ -140,6 +153,12 @@ const AppContextProvider = (prop) => {
     }
 
     authCheckStarted.current = true;
+
+    if (localStorage.getItem(AUTH_SESSION_KEY) !== "true") {
+      setAuthInitializing(false);
+      return;
+    }
+
     loadUserProfileData();
   }, []);
 

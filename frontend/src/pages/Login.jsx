@@ -14,6 +14,7 @@ const Login = () => {
     setToken,
     loadUserProfileData,
     setUserData,
+    markAuthenticated,
   } = useContext(AppContext);
   const navigate = useNavigate();
   const [state, setState] = useState("Log In");
@@ -38,6 +39,7 @@ const Login = () => {
       );
 
       if (data.success) {
+        markAuthenticated();
         setToken("");
         if (data.user) {
           setUserData(data.user);

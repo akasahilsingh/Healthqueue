@@ -8,7 +8,13 @@ import { AppContext } from "../context/AppContext";
 const Navbar = () => {
   const navigate = useNavigate();
 
-  const { backendUrl, userData, setUserData, authInitializing } = useContext(AppContext);
+  const {
+    backendUrl,
+    userData,
+    setUserData,
+    clearAuthenticated,
+    authInitializing,
+  } = useContext(AppContext);
   const [showMenu, setShowMenu] = useState();
 
   const logOut = async () => {
@@ -21,6 +27,7 @@ const Navbar = () => {
     } catch {
       // Ignore logout network failures and still clear local UI state.
     } finally {
+      clearAuthenticated();
       setUserData(false);
       navigate("/");
     }
